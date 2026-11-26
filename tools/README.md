@@ -11,7 +11,7 @@
 | `verify_puzzles.py` | 20문항 전수 검산. `index.html` 에 박힌 JSON 을 읽어 규칙 검증 |
 | `render_puzzles.py` | `site_template.html` + `puzzle_data.py` → `index.html` 생성 |
 | `site_template.html` | 화면 템플릿(`__PUZZLES_JSON__` 자리에 문항 JSON 삽입) |
-| `mobile_check.py` | Playwright 390px 모바일 검증(탭·필터·힌트·정오답·오버플로·배너) |
+| `mobile_check.py` | Playwright 375·320px 모바일 검증(탭·필터·힌트·정오답·공유·가로 넘침) |
 
 ## 사용법
 
