@@ -27,7 +27,7 @@ python3 tools/verify_puzzles.py     # 30문항 검산 (index.html 기준)
 python3 tools/verify_puzzles.py --data   # 데이터 원본만 검산
 python3 tools/export_janggi_legal.py     # 장기 합법수 기대값 갱신
 python3 tools/mobile_check.py --url http://127.0.0.1:8777/
-python3 tools/mobile_check.py --url https://not-opened.github.io/go-chess/ \
+python3 tools/mobile_check.py --url https://notopened.com/go-chess/ \
     --viewport 390x844 --shot-prefix downloads/go-chess-v3-janggi-390
 ```
 
