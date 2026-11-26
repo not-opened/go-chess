@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="description" content="notopened 바둑·체스 한 수 미니 — 설치 없이 30초 만에 즐기는 1수 사활·체크메이트 퍼즐">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="notopened 바둑·체스 한 수 미니">
+  <meta property="og:description" content="단 한 수로 승부를 가르는 바둑 단수·따내기 & 체스 체크메이트 1수 퍼즐">
+  <title>notopened 바둑·체스 한 수 미니</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>♟️</text></svg>">
+  <style>
+:root {
+  --bg: #0f172a;
+  --card-bg: #1e293b;
+  --surface-sub: #0f172a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.14);
+  --correct: #22c55e;
+  --wrong: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  background-color: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 16px 12px 32px;
+}
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.portal-header {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.icon-toggle-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.portal-header h1 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.portal-header p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.filter-chip {
+  background: var(--card-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.filter-chip.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.puzzle-tabs {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.puzzle-tab {
+  background: var(--card-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 34px;
+}
+
+.puzzle-tab.active {
+  background: var(--accent);
+  color: #0f172a;
+  border-color: var(--accent);
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.puzzle-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.type-pill {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.counter-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.puzzle-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.puzzle-prompt {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+
+.board-wrap {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto 14px;
+}
+
+.board-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.board-hit {
+  cursor: pointer;
+}
+
+.board-hit:hover {
+  fill: rgba(56, 189, 248, 0.25);
+}
+
+.feedback-box {
+  display: none;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-sub);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.feedback-box.show {
+  display: block;
+}
+
+.feedback-box.ok {
+  border-color: var(--correct);
+}
+
+.feedback-box.ng {
+  border-color: var(--wrong);
+}
+
+.feedback-box strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.feedback-source {
+  margin-top: 6px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.action-row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary,
+.btn-secondary {
+  flex: 1;
+  padding: 12px 10px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 46px;
+  border: 1px solid var(--border);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #0f172a;
+  border-color: var(--accent);
+}
+
+.btn-secondary {
+  background: var(--surface-sub);
+  color: var(--text-main);
+}
+
+.portal-footer {
+  text-align: center;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+</style>
+</head>
+<body>
+  <main class="container">
+    <header class="portal-header" role="banner">
+      <div class="header-top-row">
+        <span class="badge">notopened 바둑·체스 한 수 미니 v0.1-proto</span>
+        <button type="button" class="icon-toggle-btn" id="soundToggleBtn" aria-label="효과음 켜기/끄기" title="효과음 켜기/끄기">🔊</button>
+      </div>
+      <h1>바둑 · 체스 한 수 미니</h1>
+      <p>단 한 수로 완성하는 30초 두뇌 퍼즐 (내부 시제품)</p>
+    </header>
+
+    <!-- Filter & Puzzle Selector -->
+    <nav class="filter-bar" aria-label="종목 필터">
+      <button type="button" class="filter-chip active" data-type="all">전체 (6)</button>
+      <button type="button" class="filter-chip" data-type="go">⚫ 바둑 9×9 (3)</button>
+      <button type="button" class="filter-chip" data-type="chess">♟️ 체스 8×8 (3)</button>
+    </nav>
+
+    <div class="puzzle-tabs" id="puzzleTabs" role="group" aria-label="문제 선택"></div>
+
+    <!-- Interactive Puzzle Card -->
+    <section class="card" id="puzzleCard" aria-live="polite">
+      <div class="puzzle-meta">
+        <span class="type-pill" id="puzzleTypePill">바둑 9×9</span>
+        <span class="counter-text" id="puzzleCounter">1 / 6</span>
+      </div>
+
+      <h2 class="puzzle-title" id="puzzleTitle">문제 로딩 중...</h2>
+      <p class="puzzle-prompt" id="puzzlePrompt">보드의 정답 위치를 탭해 한 수를 두세요.</p>
+
+      <!-- Interactive SVG Board Container -->
+      <div class="board-wrap" id="boardWrap"></div>
+
+      <!-- Feedback & Explanation -->
+      <div class="feedback-box" id="feedbackBox" role="region" aria-label="정오답 및 해설">
+        <strong id="feedbackStatus"></strong>
+        <p id="feedbackText"></p>
+        <div class="feedback-source" id="feedbackSource"></div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-row">
+        <button type="button" class="btn-secondary" id="retryBtn">🔄 다시 도전하기</button>
+        <button type="button" class="btn-primary" id="nextBtn">➡️ 다음 문제</button>
+      </div>
+    </section>
+
+    <footer class="portal-footer">
+      <div class="footer-links">
+        <a href="./privacy.html" class="footer-link">개인정보처리방침</a>
+      </div>
+      <p>&copy; 2026 notopened AI ENTERPRISE. Internal Prototype (₩0 / Zero-PII).</p>
+    </footer>
+  </main>
+
+  <script>
+const miniPuzzles = [
+  {
+    id: "go-01",
+    type: "go",
+    typeLabel: "⚫ 바둑 9×9",
+    title: "1. 양단수 한 수 (흑선)",
+    prompt: "흑 차례입니다. 백 두 점을 동시에 단수로 모는(양단수) 급소를 탭하세요.",
+    size: 9,
+    stones: [
+      { r: 2, c: 3, color: "B" },
+      { r: 2, c: 4, color: "B" },
+      { r: 3, c: 3, color: "B" },
+      { r: 4, c: 2, color: "B" },
+      { r: 3, c: 4, color: "W" },
+      { r: 4, c: 3, color: "W" }
+    ],
+    playerColor: "B",
+    answer: { r: 4, c: 4 },
+    explanation: "정답은 (5, 5) 자리(양단수)입니다. 이 한 수로 두 백돌의 활로가 동시에 1개씩만 남아, 백이 한쪽을 잇더라도 다른 한쪽을 따낼 수 있습니다.",
+    source: "한국기원 바둑 입문 가이드"
+  },
+  {
+    id: "go-02",
+    type: "go",
+    typeLabel: "⚫ 바둑 9×9",
+    title: "2. 백 한 점 따내기 (흑선)",
+    prompt: "흑 차례입니다. 활로가 1개만 남은 백돌을 즉시 따내는 한 수를 두세요.",
+    size: 9,
+    stones: [
+      { r: 1, c: 2, color: "B" },
+      { r: 2, c: 1, color: "B" },
+      { r: 3, c: 2, color: "B" },
+      { r: 2, c: 2, color: "W" }
+    ],
+    playerColor: "B",
+    answer: { r: 2, c: 3 },
+    explanation: "정답은 백돌의 마지막 활로인 오른쪽 자리입니다. 상하좌우 활로를 모두 막아 백돌을 판에서 들어낼 수 있습니다.",
+    source: "한국기원 바둑 규칙"
+  },
+  {
+    id: "go-03",
+    type: "go",
+    typeLabel: "⚫ 바둑 9×9",
+    title: "3. 1선 변(邊) 따내기 (흑선)",
+    prompt: "흑 차례입니다. 바둑판 가장자리(1선)에 몰린 백돌을 잡는 마지막 한 수를 두세요.",
+    size: 9,
+    stones: [
+      { r: 0, c: 3, color: "B" },
+      { r: 1, c: 4, color: "B" },
+      { r: 0, c: 4, color: "W" }
+    ],
+    playerColor: "B",
+    answer: { r: 0, c: 5 },
+    explanation: "정답은 1선 오른쪽 빈 칸입니다. 바둑판 가장자리는 원래 활로가 3개뿐이므로, 나머지 1개 활로를 막으면 바로 따낼 수 있습니다.",
+    source: "한국기원 바둑 입문 가이드"
+  },
+  {
+    id: "chess-01",
+    type: "chess",
+    typeLabel: "♟️ 체스 8×8",
+    title: "4. 백랭크 1수 체크메이트 (백선)",
+    prompt: "백 차례입니다. 백 룩(♖, a1)을 이동해 단 한 수로 체크메이트(Ra8#)를 완성하세요.",
+    size: 8,
+    pieces: [
+      { r: 0, c: 6, symbol: "♚", side: "B" },
+      { r: 1, c: 5, symbol: "♟", side: "B" },
+      { r: 1, c: 6, symbol: "♟", side: "B" },
+      { r: 1, c: 7, symbol: "♟", side: "B" },
+      { r: 7, c: 0, symbol: "♖", side: "W", mover: true },
+      { r: 7, c: 6, symbol: "♔", side: "W" }
+    ],
+    moverSymbol: "♖",
+    answer: { r: 0, c: 0 },
+    explanation: "정답은 a8(Ra8#)입니다. 8번째 랭크를 룩으로 장악하면 흑 킹은 앞줄 폰들(f7·g7·h7)에 가로막혀 탈출할 칸이 없는 백랭크 체크메이트가 됩니다.",
+    source: "FIDE Laws of Chess"
+  },
+  {
+    id: "chess-02",
+    type: "chess",
+    typeLabel: "♟️ 체스 8×8",
+    title: "5. 퀸+킹 1수 체크메이트 (백선)",
+    prompt: "백 차례입니다. 백 퀸(♕, f5)을 이동해 백 킹(♔, g6)의 엄호를 받으며 체크메이트(Qg7#)를 완성하세요.",
+    size: 8,
+    pieces: [
+      { r: 0, c: 7, symbol: "♚", side: "B" },
+      { r: 2, c: 6, symbol: "♔", side: "W" },
+      { r: 3, c: 5, symbol: "♕", side: "W", mover: true }
+    ],
+    moverSymbol: "♕",
+    answer: { r: 1, c: 6 },
+    explanation: "정답은 g7(Qg7#)입니다. 백 킹(g6)이 g7 퀸을 보호하므로 흑 킹은 퀸을 잡을 수 없고, g8·h7도 공격받아 즉시 체크메이트입니다.",
+    source: "FIDE Laws of Chess"
+  },
+  {
+    id: "chess-03",
+    type: "chess",
+    typeLabel: "♟️ 체스 8×8",
+    title: "6. 나이트 로열 포크 (백선)",
+    prompt: "백 차례입니다. 백 나이트(♘, d5)로 흑 킹(♚, e8)과 흑 퀸(♛, a8)을 동시에 공격하는 한 수를 두세요.",
+    size: 8,
+    pieces: [
+      { r: 0, c: 4, symbol: "♚", side: "B" },
+      { r: 0, c: 0, symbol: "♛", side: "B" },
+      { r: 3, c: 3, symbol: "♘", side: "W", mover: true },
+      { r: 7, c: 4, symbol: "♔", side: "W" }
+    ],
+    moverSymbol: "♘",
+    answer: { r: 1, c: 2 },
+    explanation: "정답은 c7(Nc7+)입니다. L자 행마로 흑 킹에 체크를 거는 동시에 a8의 흑 퀸까지 위협해 다음 수에 퀸을 잡는 '로열 포크'가 성립합니다.",
+    source: "FIDE Laws of Chess"
+  }
+];
+
+
+let activeFilter = 'all';
+let filteredList = miniPuzzles;
+let currentIdx = 0;
+let solvedState = null; // null | { r, c, isCorrect }
+let soundEnabled = true;
+let audioCtx = null;
+
+function playTone(type) {
+  if (!soundEnabled || typeof window === 'undefined') return;
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type === 'ok' ? 'sine' : 'triangle';
+    osc.frequency.setValueAtTime(type === 'ok' ? 660 : 210, now);
+    if (type === 'ok') osc.frequency.setValueAtTime(880, now + 0.08);
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.22);
+  } catch (e) { /* ignore */ }
+}
+
+function getCurrentPuzzle() {
+  return filteredList[currentIdx % filteredList.length];
+}
+
+function renderTabs() {
+  const wrap = document.getElementById('puzzleTabs');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  filteredList.forEach((p, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `puzzle-tab${idx === currentIdx ? ' active' : ''}`;
+    btn.textContent = `#${idx + 1} ${p.type === 'go' ? '바둑' : '체스'}`;
+    btn.setAttribute('data-idx', String(idx));
+    btn.onclick = () => selectPuzzle(idx);
+    wrap.appendChild(btn);
+  });
+}
+
+function renderGoBoard(puzzle) {
+  const size = puzzle.size;
+  const pad = 26;
+  const cell = 38;
+  const vb = pad * 2 + cell * (size - 1);
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${vb} ${vb}`);
+  svg.setAttribute('class', 'board-svg');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', '9x9 바둑판');
+
+  const bg = document.createElementNS(svgNS, 'rect');
+  bg.setAttribute('width', vb);
+  bg.setAttribute('height', vb);
+  bg.setAttribute('rx', '10');
+  bg.setAttribute('fill', '#dcb35c');
+  svg.appendChild(bg);
+
+  for (let i = 0; i < size; i++) {
+    const pos = pad + i * cell;
+    const h = document.createElementNS(svgNS, 'line');
+    h.setAttribute('x1', pad);
+    h.setAttribute('y1', pos);
+    h.setAttribute('x2', vb - pad);
+    h.setAttribute('y2', pos);
+    h.setAttribute('stroke', '#3b2f1c');
+    h.setAttribute('stroke-width', '1.3');
+    svg.appendChild(h);
+
+    const v = document.createElementNS(svgNS, 'line');
+    v.setAttribute('x1', pos);
+    v.setAttribute('y1', pad);
+    v.setAttribute('x2', pos);
+    v.setAttribute('y2', vb - pad);
+    v.setAttribute('stroke', '#3b2f1c');
+    v.setAttribute('stroke-width', '1.3');
+    svg.appendChild(v);
+  }
+
+  // Star points for 9x9
+  [[2, 2], [2, 6], [4, 4], [6, 2], [6, 6]].forEach(([sr, sc]) => {
+    const dot = document.createElementNS(svgNS, 'circle');
+    dot.setAttribute('cx', pad + sc * cell);
+    dot.setAttribute('cy', pad + sr * cell);
+    dot.setAttribute('r', '3.2');
+    dot.setAttribute('fill', '#3b2f1c');
+    svg.appendChild(dot);
+  });
+
+  const occupied = new Map();
+  puzzle.stones.forEach(s => occupied.set(`${s.r},${s.c}`, s.color));
+
+  // Render placed move if answered
+  if (solvedState) {
+    occupied.set(`${solvedState.r},${solvedState.c}`, puzzle.playerColor);
+  }
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const cx = pad + c * cell;
+      const cy = pad + r * cell;
+      const stoneColor = occupied.get(`${r},${c}`);
+      if (stoneColor) {
+        const st = document.createElementNS(svgNS, 'circle');
+        st.setAttribute('cx', cx);
+        st.setAttribute('cy', cy);
+        st.setAttribute('r', '15');
+        st.setAttribute('fill', stoneColor === 'B' ? '#111827' : '#f8fafc');
+        st.setAttribute('stroke', stoneColor === 'B' ? '#000000' : '#64748b');
+        st.setAttribute('stroke-width', '1.5');
+        svg.appendChild(st);
+
+        if (solvedState && solvedState.r === r && solvedState.c === c) {
+          const ring = document.createElementNS(svgNS, 'circle');
+          ring.setAttribute('cx', cx);
+          ring.setAttribute('cy', cy);
+          ring.setAttribute('r', '7');
+          ring.setAttribute('fill', 'none');
+          ring.setAttribute('stroke', solvedState.isCorrect ? '#22c55e' : '#ef4444');
+          ring.setAttribute('stroke-width', '2.8');
+          svg.appendChild(ring);
+        }
+      } else {
+        const hit = document.createElementNS(svgNS, 'circle');
+        hit.setAttribute('cx', cx);
+        hit.setAttribute('cy', cy);
+        hit.setAttribute('r', '16');
+        hit.setAttribute('fill', 'transparent');
+        hit.setAttribute('class', 'board-hit');
+        hit.setAttribute('data-row', String(r));
+        hit.setAttribute('data-col', String(c));
+        hit.setAttribute('role', 'button');
+        hit.setAttribute('aria-label', `${r + 1}행 ${c + 1}열 착수`);
+        hit.onclick = () => handleMove(r, c);
+        svg.appendChild(hit);
+      }
+    }
+  }
+  return svg;
+}
+
+function renderChessBoard(puzzle) {
+  const size = puzzle.size;
+  const cell = 44;
+  const vb = cell * size;
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${vb} ${vb}`);
+  svg.setAttribute('class', 'board-svg');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', '8x8 체스판');
+
+  const pieceMap = new Map();
+  puzzle.pieces.forEach(p => {
+    if (solvedState && p.mover) return; // move piece to destination
+    pieceMap.set(`${p.r},${p.c}`, p);
+  });
+  if (solvedState) {
+    pieceMap.set(`${solvedState.r},${solvedState.c}`, {
+      r: solvedState.r,
+      c: solvedState.c,
+      symbol: puzzle.moverSymbol,
+      side: 'W'
+    });
+  }
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const isLight = (r + c) % 2 === 0;
+      const sq = document.createElementNS(svgNS, 'rect');
+      sq.setAttribute('x', c * cell);
+      sq.setAttribute('y', r * cell);
+      sq.setAttribute('width', cell);
+      sq.setAttribute('height', cell);
+
+      let fill = isLight ? '#e2e8f0' : '#475569';
+      if (solvedState && solvedState.r === r && solvedState.c === c) {
+        fill = solvedState.isCorrect ? '#86efac' : '#fca5a5';
+      }
+      sq.setAttribute('fill', fill);
+      sq.setAttribute('class', solvedState ? '' : 'board-hit');
+      sq.setAttribute('data-row', String(r));
+      sq.setAttribute('data-col', String(c));
+      sq.setAttribute('role', 'button');
+      sq.setAttribute('aria-label', `${String.fromCharCode(97 + c)}${8 - r} 칸 선택`);
+      sq.onclick = () => handleMove(r, c);
+      svg.appendChild(sq);
+
+      const p = pieceMap.get(`${r},${c}`);
+      if (p) {
+        const txt = document.createElementNS(svgNS, 'text');
+        txt.setAttribute('x', c * cell + cell / 2);
+        txt.setAttribute('y', r * cell + cell * 0.72);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('font-size', '30');
+        txt.setAttribute('pointer-events', 'none');
+        txt.setAttribute('fill', p.side === 'W' ? '#0f172a' : '#020617');
+        txt.textContent = p.symbol;
+        svg.appendChild(txt);
+      }
+    }
+  }
+  return svg;
+}
+
+function handleMove(r, c) {
+  if (solvedState) return;
+  const puzzle = getCurrentPuzzle();
+  const isCorrect = (r === puzzle.answer.r && c === puzzle.answer.c);
+  solvedState = { r, c, isCorrect };
+  playTone(isCorrect ? 'ok' : 'ng');
+  renderBoardOnly();
+  renderFeedback(puzzle, isCorrect);
+}
+
+function renderFeedback(puzzle, isCorrect) {
+  const box = document.getElementById('feedbackBox');
+  const status = document.getElementById('feedbackStatus');
+  const text = document.getElementById('feedbackText');
+  const source = document.getElementById('feedbackSource');
+  if (!box) return;
+  box.className = `feedback-box show ${isCorrect ? 'ok' : 'ng'}`;
+  if (status) {
+    status.textContent = isCorrect ? '✅ 정답입니다! 완벽한 한 수예요.' : '❌ 아쉽습니다! 다시 도전하거나 해설을 확인해 보세요.';
+    status.style.color = isCorrect ? 'var(--correct)' : 'var(--wrong)';
+  }
+  if (text) text.textContent = puzzle.explanation;
+  if (source) source.textContent = `출처: ${puzzle.source}`;
+}
+
+function renderBoardOnly() {
+  const puzzle = getCurrentPuzzle();
+  const wrap = document.getElementById('boardWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  wrap.appendChild(puzzle.type === 'go' ? renderGoBoard(puzzle) : renderChessBoard(puzzle));
+}
+
+function renderPuzzle() {
+  solvedState = null;
+  const puzzle = getCurrentPuzzle();
+  const typePill = document.getElementById('puzzleTypePill');
+  const counter = document.getElementById('puzzleCounter');
+  const title = document.getElementById('puzzleTitle');
+  const prompt = document.getElementById('puzzlePrompt');
+  const fb = document.getElementById('feedbackBox');
+
+  if (typePill) typePill.textContent = puzzle.typeLabel;
+  if (counter) counter.textContent = `${currentIdx + 1} / ${filteredList.length}`;
+  if (title) title.textContent = puzzle.title;
+  if (prompt) prompt.textContent = puzzle.prompt;
+  if (fb) fb.className = 'feedback-box';
+
+  renderTabs();
+  renderBoardOnly();
+}
+
+function retryPuzzle() {
+  renderPuzzle();
+}
+
+function nextPuzzle() {
+  currentIdx = (currentIdx + 1) % filteredList.length;
+  renderPuzzle();
+}
+
+function selectPuzzle(idx) {
+  currentIdx = idx;
+  renderPuzzle();
+}
+
+function setFilter(typeKey) {
+  activeFilter = typeKey;
+  filteredList = typeKey === 'all' ? miniPuzzles : miniPuzzles.filter(p => p.type === typeKey);
+  currentIdx = 0;
+  document.querySelectorAll('.filter-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-type') === typeKey);
+  });
+  renderPuzzle();
+}
+
+function init() {
+  document.querySelectorAll('.filter-chip').forEach(btn => {
+    btn.addEventListener('click', () => setFilter(btn.getAttribute('data-type')));
+  });
+  const retryBtn = document.getElementById('retryBtn');
+  if (retryBtn) retryBtn.addEventListener('click', retryPuzzle);
+  const nextBtn = document.getElementById('nextBtn');
+  if (nextBtn) nextBtn.addEventListener('click', nextPuzzle);
+  const soundBtn = document.getElementById('soundToggleBtn');
+  if (soundBtn) {
+    soundBtn.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+    });
+  }
+  renderPuzzle();
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', init);
+  window.setFilter = setFilter;
+  window.selectPuzzle = selectPuzzle;
+  window.retryPuzzle = retryPuzzle;
+  window.nextPuzzle = nextPuzzle;
+}
+
+</script>
+</body>
+</html>
