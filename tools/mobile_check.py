@@ -2,7 +2,7 @@
 """모바일 검증 — 30문항(바둑·체스·장기)·장기 조작·공유·쿠팡 배너·가로 넘침.
 
     python3 tools/mobile_check.py --url http://127.0.0.1:8777/
-    python3 tools/mobile_check.py --url https://not-opened.github.io/go-chess/ \\
+    python3 tools/mobile_check.py --url https://notopened.com/go-chess/ \\
         --viewport 390x844 --shot-prefix downloads/go-chess-v3-janggi-390
 """
 import argparse
@@ -61,7 +61,7 @@ def run(url, shot_prefix, out_json, vw, vh):
         check("애드센스 없음", "pagead2" not in html and "ca-pub-" not in html)
 
         check("제목", "바둑·체스·장기 한 수 미니" in page.title(), page.title())
-        check("canonical", page.locator('link[rel="canonical"]').get_attribute("href") == "https://not-opened.github.io/go-chess/")
+        check("canonical", page.locator('link[rel="canonical"]').get_attribute("href") == "https://notopened.com/go-chess/")
         check("og:image", (page.locator('meta[property="og:image"]').get_attribute("content") or "").endswith("/og.png"))
         check("og:description 30문항", "30문항" in (page.locator('meta[property="og:description"]').get_attribute("content") or ""))
         check("twitter card", page.locator('meta[name="twitter:card"]').get_attribute("content") == "summary_large_image")
@@ -270,7 +270,7 @@ def run(url, shot_prefix, out_json, vw, vh):
         page.wait_for_timeout(400)
         clip = page.evaluate("() => navigator.clipboard.readText()")
         check("공유 문구", "바둑·체스·장기 한 수 미니" in clip and "푼 문제 30/30" in clip, clip)
-        check("공유 링크", "https://not-opened.github.io/go-chess/" in clip, clip)
+        check("공유 링크", "https://notopened.com/go-chess/" in clip, clip)
 
         # ---------- 하단 링크 ----------
         footer = page.evaluate("""() => [...document.querySelectorAll('footer a')].map(a => a.textContent.trim() + ' ' + a.href)""")

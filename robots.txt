@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://not-opened.github.io/go-chess/sitemap.xml
+Sitemap: https://notopened.com/go-chess/sitemap.xml
