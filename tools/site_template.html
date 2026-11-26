@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="description" content="notopened 바둑·체스 한 수 미니 v2 — 설치 없이 30초, 입문·중급·고급 20문항 1수 사활·체크메이트 퍼즐">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="notopened 바둑·체스 한 수 미니 v2">
+  <meta property="og:description" content="단 한 수로 승부를 가르는 바둑·체스 1수 퍼즐 20문항 (입문·중급·고급)">
+  <title>notopened 바둑·체스 한 수 미니 v2</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>♟️</text></svg>">
+  <style>
+:root {
+  --bg: #0f172a;
+  --card-bg: #1e293b;
+  --surface-sub: #0f172a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.14);
+  --correct: #22c55e;
+  --wrong: #ef4444;
+  --easy: #34d399;
+  --mid: #fbbf24;
+  --hard: #f472b6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { overflow-x: hidden; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  background-color: var(--bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 16px 12px 32px;
+  -webkit-text-size-adjust: 100%;
+}
+
+.container { max-width: 480px; margin: 0 auto; width: 100%; }
+
+.portal-header { text-align: center; margin-bottom: 12px; }
+
+.header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.icon-toggle-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  flex: 0 0 auto;
+}
+
+.portal-header h1 { font-size: 1.32rem; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.01em; }
+
+.portal-header > p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; }
+
+.daily-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  background: linear-gradient(135deg, rgba(56,189,248,0.22), rgba(56,189,248,0.06));
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: var(--text-main);
+  cursor: pointer;
+  min-height: 58px;
+}
+
+.daily-btn .daily-icon { font-size: 1.35rem; flex: 0 0 auto; }
+.daily-btn .daily-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.daily-btn .daily-title { font-size: 0.95rem; font-weight: 800; }
+.daily-btn .daily-sub {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.daily-btn.done { border-color: rgba(34, 197, 94, 0.6); background: linear-gradient(135deg, rgba(34,197,94,0.20), rgba(34,197,94,0.05)); }
+.daily-btn.done .daily-sub { color: #86efac; }
+
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.filter-chip {
+  background: var(--card-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 38px;
+  font-family: inherit;
+}
+
+.filter-chip.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+.filter-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  align-self: center;
+  margin-right: 2px;
+}
+
+.progress-line {
+  text-align: center;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin: 2px 0 10px;
+  font-weight: 600;
+}
+.progress-line b { color: var(--accent); }
+
+.puzzle-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 12px;
+  margin-bottom: 6px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.puzzle-tab {
+  flex: 0 0 auto;
+  background: var(--card-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 36px;
+  font-family: inherit;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.puzzle-tab .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.dot.easy { background: var(--easy); }
+.dot.mid { background: var(--mid); }
+.dot.hard { background: var(--hard); }
+
+.puzzle-tab.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+.puzzle-tab.active .dot { background: #0f172a; }
+.puzzle-tab.solved { border-color: rgba(34, 197, 94, 0.55); }
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.card.is-daily { border-color: rgba(56, 189, 248, 0.65); box-shadow: 0 0 0 1px rgba(56,189,248,0.18) inset; }
+
+.puzzle-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.type-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+.diff-pill {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.diff-pill.easy { color: var(--easy); border-color: rgba(52, 211, 153, 0.5); }
+.diff-pill.mid { color: var(--mid); border-color: rgba(251, 191, 36, 0.5); }
+.diff-pill.hard { color: var(--hard); border-color: rgba(244, 114, 182, 0.5); }
+
+.counter-text { font-size: 0.76rem; color: var(--text-muted); font-weight: 600; }
+
+.puzzle-title { font-size: 1.02rem; font-weight: 800; margin-bottom: 6px; line-height: 1.35; }
+
+.puzzle-prompt { font-size: 0.83rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
+
+.board-wrap { width: 100%; max-width: 380px; margin: 0 auto 12px; }
+
+.board-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.board-hit { cursor: pointer; }
+.board-hit:hover { fill: rgba(56, 189, 248, 0.25); }
+
+.hint-btn {
+  width: 100%;
+  background: var(--surface-sub);
+  color: #fde68a;
+  border: 1px dashed rgba(253, 230, 138, 0.55);
+  border-radius: 10px;
+  padding: 11px 10px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 44px;
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
+.hint-box {
+  background: rgba(253, 230, 138, 0.08);
+  border: 1px solid rgba(253, 230, 138, 0.3);
+  border-radius: 10px;
+  padding: 11px 12px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #fef3c7;
+  margin-bottom: 10px;
+}
+.hint-box[hidden] { display: none; }
+
+.feedback-box {
+  display: none;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-sub);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+  font-size: 0.83rem;
+  line-height: 1.55;
+}
+
+.feedback-box.show { display: block; }
+.feedback-box.ok { border-color: var(--correct); }
+.feedback-box.ng { border-color: var(--wrong); }
+.feedback-box strong { display: block; margin-bottom: 5px; font-size: 0.9rem; }
+
+.feedback-answer {
+  margin-top: 8px;
+  font-size: 0.76rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.feedback-source { margin-top: 6px; font-size: 0.72rem; color: var(--text-muted); }
+
+.action-row { display: flex; gap: 8px; }
+
+.btn-primary, .btn-secondary {
+  flex: 1;
+  padding: 12px 10px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 46px;
+  border: 1px solid var(--border);
+  font-family: inherit;
+}
+
+.btn-primary { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+.btn-secondary { background: var(--surface-sub); color: var(--text-main); }
+
+.portal-footer { text-align: center; font-size: 0.74rem; color: var(--text-muted); }
+
+.cross-promo { margin-bottom: 16px; }
+.cross-promo h3 { font-size: 0.86rem; font-weight: 800; margin-bottom: 8px; text-align: left; color: var(--text-main); }
+
+.web-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: var(--text-main);
+  min-height: 60px;
+}
+
+.web-card h4 { font-size: 0.84rem; font-weight: 800; margin-bottom: 3px; }
+.web-card p { font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; }
+.web-card .go { font-size: 0.76rem; color: var(--accent); font-weight: 800; flex: 0 0 auto; }
+
+.affiliate-section { margin-bottom: 16px; }
+.affiliate-section[hidden] { display: none; }
+
+.coupang-wrap {
+  max-width: 100%;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.coupang-slot { transform-origin: top left; }
+
+.affiliate-note {
+  font-size: 0.69rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-top: 6px;
+  text-align: left;
+}
+
+.footer-links { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.footer-link { color: var(--accent); text-decoration: none; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  background: #0b1220;
+  border: 1px solid var(--accent);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  padding: 10px 14px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+  max-width: 90vw;
+}
+.toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="portal-header" role="banner">
+      <div class="header-top-row">
+        <span class="badge">notopened 바둑·체스 한 수 미니 v2.0</span>
+        <button type="button" class="icon-toggle-btn" id="soundToggleBtn" aria-label="효과음 켜기/끄기" title="효과음 켜기/끄기">🔊</button>
+      </div>
+      <h1>바둑 · 체스 한 수 미니</h1>
+      <p>단 한 수로 끝내는 30초 두뇌 퍼즐 · 입문부터 고급까지 20문항</p>
+      <button type="button" class="daily-btn" id="dailyBtn" aria-label="오늘의 한 수 바로 풀기">
+        <span class="daily-icon" id="dailyIcon">🎯</span>
+        <span class="daily-text">
+          <span class="daily-title" id="dailyTitle">오늘의 한 수 바로 풀기</span>
+          <span class="daily-sub" id="dailySub">오늘의 문제를 불러오는 중…</span>
+        </span>
+      </button>
+    </header>
+
+    <nav class="filter-bar" id="typeFilters" aria-label="종목 필터">
+      <span class="filter-label">종목</span>
+      <button type="button" class="filter-chip active" data-type="all">전체 20</button>
+      <button type="button" class="filter-chip" data-type="go">⚫ 바둑 10</button>
+      <button type="button" class="filter-chip" data-type="chess">♟️ 체스 10</button>
+    </nav>
+
+    <nav class="filter-bar" id="diffFilters" aria-label="난이도 필터">
+      <span class="filter-label">난이도</span>
+      <button type="button" class="filter-chip active" data-diff="all">전체</button>
+      <button type="button" class="filter-chip" data-diff="입문">입문</button>
+      <button type="button" class="filter-chip" data-diff="중급">중급</button>
+      <button type="button" class="filter-chip" data-diff="고급">고급</button>
+    </nav>
+
+    <p class="progress-line">푼 문제 <b id="solvedCount">0</b> / 20</p>
+
+    <div class="puzzle-tabs" id="puzzleTabs" role="tablist" aria-label="문제 선택"></div>
+
+    <section class="card" id="puzzleCard" aria-live="polite">
+      <div class="puzzle-meta">
+        <span class="type-pill" id="puzzleTypePill">바둑 9×9</span>
+        <span class="diff-pill mid" id="puzzleDiffPill">입문</span>
+        <span class="counter-text" id="puzzleCounter">1 / 20</span>
+      </div>
+
+      <h2 class="puzzle-title" id="puzzleTitle">문제 로딩 중…</h2>
+      <p class="puzzle-prompt" id="puzzlePrompt">보드의 정답 위치를 탭해 한 수를 두세요.</p>
+
+      <div class="board-wrap" id="boardWrap"></div>
+
+      <button type="button" class="hint-btn" id="hintBtn" aria-expanded="false" aria-controls="hintBox">💡 힌트 보기</button>
+      <div class="hint-box" id="hintBox" hidden></div>
+
+      <div class="feedback-box" id="feedbackBox" role="region" aria-label="정오답 및 해설">
+        <strong id="feedbackStatus"></strong>
+        <p id="feedbackText"></p>
+        <div class="feedback-answer" id="feedbackAnswer"></div>
+        <div class="feedback-source" id="feedbackSource"></div>
+      </div>
+
+      <div class="action-row">
+        <button type="button" class="btn-secondary" id="retryBtn">🔄 다시 도전</button>
+        <button type="button" class="btn-primary" id="nextBtn">➡️ 다음 문제</button>
+      </div>
+    </section>
+
+    <nav class="cross-promo" aria-label="notopened 다른 웹 콘텐츠 바로가기">
+      <h3>🧠 notopened 다른 웹 콘텐츠</h3>
+      <a class="web-card" href="https://not-opened.github.io/quiz/" rel="noopener">
+        <span>
+          <h4>웹 1호 · 1일 1상식 두뇌 퀴즈</h4>
+          <p>하루 5문항, 상식·시사 두뇌 체크</p>
+        </span>
+        <span class="go">바로가기 →</span>
+      </a>
+      <a class="web-card" href="https://not-opened.github.io/fortune/" rel="noopener">
+        <span>
+          <h4>웹 3호 · 사주·꿈풀이·MBTI 궁합</h4>
+          <p>가입 없이 30초, 오늘의 운세 확인</p>
+        </span>
+        <span class="go">바로가기 →</span>
+      </a>
+    </nav>
+
+    <section class="affiliate-section" id="affiliateSection" aria-label="쿠팡 파트너스 추천 상품" hidden>
+      <div class="coupang-wrap" id="coupangWrap">
+        <div class="coupang-slot" id="coupangSlot"></div>
+      </div>
+      <p class="affiliate-note">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+    </section>
+
+    <footer class="portal-footer">
+      <div class="footer-links">
+        <a href="./privacy.html" class="footer-link">개인정보처리방침</a>
+      </div>
+      <p>&copy; 2026 notopened AI ENTERPRISE. Zero-PII · 쿠팡 파트너스 제휴 배너</p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- 쿠팡 파트너스 다이나믹 배너 (not-opened.github.io/go-chess 등록분) -->
+  <script src="https://ads-partners.coupang.com/g.js"></script>
+  <script>
+  new PartnersCoupang.G({"id":1059927,"template":"carousel","trackingCode":"AF2725831","width":"680","height":"140","tsource":"","container":"#coupangSlot","onLoaded":function(hasAd){
+    if (hasAd && typeof window.fitCoupangBanner === 'function') window.fitCoupangBanner();
+  }});
+  </script>
+
+  <script>
+const miniPuzzles = __PUZZLES_JSON__;
+
+const DIFF_CLASS = { '입문': 'easy', '중급': 'mid', '고급': 'hard' };
+const STORE_SOLVED = 'gochess.solved.v2';
+const STORE_DAILY = 'gochess.daily.v2';
+
+let typeFilter = 'all';
+let diffFilter = 'all';
+let list = [];
+let idx = 0;
+let played = null;      // 정답/오답 처리 후의 보드 상태
+let hintShown = false;
+let soundEnabled = true;
+let audioCtx = null;
+let dailyIdx = 0;
+
+function safeGet(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw === null ? fallback : JSON.parse(raw);
+  } catch (e) { return fallback; }
+}
+function safeSet(key, value) {
+  try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
+}
+
+function solvedIds() {
+  const v = safeGet(STORE_SOLVED, []);
+  return Array.isArray(v) ? v : [];
+}
+function markSolved(id) {
+  const s = solvedIds();
+  if (s.indexOf(id) === -1) { s.push(id); safeSet(STORE_SOLVED, s); }
+  renderProgress();
+}
+function renderProgress() {
+  const el = document.getElementById('solvedCount');
+  if (el) el.textContent = String(Math.min(solvedIds().length, miniPuzzles.length));
+}
+
+/* ---------- 날짜(한국 시간) 기반 오늘의 한 수 ---------- */
+function kstDateKey() {
+  const now = new Date();
+  const kst = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 9 * 3600000);
+  const y = kst.getFullYear();
+  const m = String(kst.getMonth() + 1).padStart(2, '0');
+  const d = String(kst.getDate()).padStart(2, '0');
+  return { key: y + '-' + m + '-' + d, label: (kst.getMonth() + 1) + '월 ' + kst.getDate() + '일', dayNumber: Math.floor(Date.UTC(y, kst.getMonth(), kst.getDate()) / 86400000) };
+}
+
+function typeNo(p) { return parseInt(String(p.id).split('-')[1], 10) || 0; }
+function typeName(p) { return p.type === 'go' ? '바둑' : '체스'; }
+
+function renderDaily() {
+  const info = kstDateKey();
+  dailyIdx = info.dayNumber % miniPuzzles.length;
+  const p = miniPuzzles[dailyIdx];
+  const doneMap = safeGet(STORE_DAILY, {});
+  const done = !!(doneMap && doneMap[info.key]);
+  const sub = document.getElementById('dailySub');
+  const btn = document.getElementById('dailyBtn');
+  const icon = document.getElementById('dailyIcon');
+  const title = document.getElementById('dailyTitle');
+  if (sub) sub.textContent = info.label + ' · ' + typeName(p) + ' ' + typeNo(p) + '번 · ' + p.difficulty + (done ? ' · 오늘 완료 ✅' : '');
+  if (title) title.textContent = done ? '오늘의 한 수 완료 — 다시 풀기' : '오늘의 한 수 바로 풀기';
+  if (btn) btn.classList.toggle('done', done);
+  if (icon) icon.textContent = done ? '✅' : '🎯';
+}
+
+function markDailyDone(p) {
+  const info = kstDateKey();
+  const map = safeGet(STORE_DAILY, {}) || {};
+  map[info.key] = p.id;
+  safeSet(STORE_DAILY, map);
+  renderDaily();
+}
+
+/* ---------- 필터/목록 ---------- */
+function applyFilter() {
+  list = miniPuzzles.filter(function (p) {
+    return (typeFilter === 'all' || p.type === typeFilter) &&
+           (diffFilter === 'all' || p.difficulty === diffFilter);
+  });
+  if (!list.length) { list = miniPuzzles.slice(); }
+  idx = 0;
+  played = null;
+  hintShown = false;
+  renderAll();
+}
+
+function current() { return list[((idx % list.length) + list.length) % list.length]; }
+function globalIndex(p) { return miniPuzzles.indexOf(p); }
+
+function selectGlobal(gi) {
+  const p = miniPuzzles[gi];
+  if (!p) return;
+  typeFilter = 'all';
+  diffFilter = 'all';
+  list = miniPuzzles.slice();
+  syncChips();
+  idx = gi;
+  played = null;
+  hintShown = false;
+  renderAll();
+  const card = document.getElementById('puzzleCard');
+  if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function syncChips() {
+  document.querySelectorAll('#typeFilters .filter-chip').forEach(function (b) {
+    b.classList.toggle('active', b.getAttribute('data-type') === typeFilter);
+  });
+  document.querySelectorAll('#diffFilters .filter-chip').forEach(function (b) {
+    b.classList.toggle('active', b.getAttribute('data-diff') === diffFilter);
+  });
+}
+
+/* ---------- 효과음 ---------- */
+function playTone(type) {
+  if (!soundEnabled) return;
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type === 'ok' ? 'sine' : 'triangle';
+    osc.frequency.setValueAtTime(type === 'ok' ? 660 : 210, now);
+    if (type === 'ok') osc.frequency.setValueAtTime(880, now + 0.08);
+    gain.gain.setValueAtTime(0.07, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.22);
+  } catch (e) { /* ignore */ }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  window.clearTimeout(showToast._timer);
+  showToast._timer = window.setTimeout(function () { t.classList.remove('show'); }, 1800);
+}
+
+/* ---------- 바둑 규칙 (활로/따내기/자충수) ---------- */
+const goKey = function (r, c) { return r + ',' + c; };
+
+function goNeighbors(r, c, size) {
+  const out = [];
+  if (r > 0) out.push([r - 1, c]);
+  if (r < size - 1) out.push([r + 1, c]);
+  if (c > 0) out.push([r, c - 1]);
+  if (c < size - 1) out.push([r, c + 1]);
+  return out;
+}
+
+function goGroup(map, r, c, size) {
+  const color = map.get(goKey(r, c));
+  const stones = [];
+  const seen = new Set([goKey(r, c)]);
+  const stack = [[r, c]];
+  const libs = new Set();
+  while (stack.length) {
+    const cur = stack.pop();
+    stones.push(cur);
+    goNeighbors(cur[0], cur[1], size).forEach(function (n) {
+      const k = goKey(n[0], n[1]);
+      const v = map.get(k);
+      if (v === undefined) { libs.add(k); }
+      else if (v === color && !seen.has(k)) { seen.add(k); stack.push(n); }
+    });
+  }
+  return { stones: stones, libs: libs };
+}
+
+function goPlay(map, r, c, color, size) {
+  if (map.has(goKey(r, c))) return { ok: false, reason: 'occupied' };
+  const next = new Map(map);
+  next.set(goKey(r, c), color);
+  const opp = color === 'B' ? 'W' : 'B';
+  const captured = [];
+  goNeighbors(r, c, size).forEach(function (n) {
+    if (next.get(goKey(n[0], n[1])) === opp) {
+      const g = goGroup(next, n[0], n[1], size);
+      if (g.libs.size === 0) {
+        g.stones.forEach(function (s) {
+          next.delete(goKey(s[0], s[1]));
+          captured.push(s);
+        });
+      }
+    }
+  });
+  const own = goGroup(next, r, c, size);
+  if (own.libs.size === 0) return { ok: false, reason: 'suicide' };
+  return { ok: true, board: next, captured: captured };
+}
+
+function stonesToMap(p) {
+  const m = new Map();
+  p.stones.forEach(function (s) { m.set(goKey(s.r, s.c), s.color); });
+  return m;
+}
+
+/* ---------- 보드 렌더 (바둑) ---------- */
+function renderGoBoard(p) {
+  const size = p.size;
+  const pad = 26;
+  const cell = 34;
+  const vb = pad * 2 + cell * (size - 1);
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 ' + vb + ' ' + vb);
+  svg.setAttribute('class', 'board-svg');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', '9x9 바둑판');
+
+  const bg = document.createElementNS(svgNS, 'rect');
+  bg.setAttribute('width', vb); bg.setAttribute('height', vb);
+  bg.setAttribute('rx', '10'); bg.setAttribute('fill', '#dcb35c');
+  svg.appendChild(bg);
+
+  for (let i = 0; i < size; i++) {
+    const pos = pad + i * cell;
+    const h = document.createElementNS(svgNS, 'line');
+    h.setAttribute('x1', pad); h.setAttribute('y1', pos);
+    h.setAttribute('x2', vb - pad); h.setAttribute('y2', pos);
+    h.setAttribute('stroke', '#3b2f1c'); h.setAttribute('stroke-width', '1.1');
+    svg.appendChild(h);
+    const v = document.createElementNS(svgNS, 'line');
+    v.setAttribute('x1', pos); v.setAttribute('y1', pad);
+    v.setAttribute('x2', pos); v.setAttribute('y2', vb - pad);
+    v.setAttribute('stroke', '#3b2f1c'); v.setAttribute('stroke-width', '1.1');
+    svg.appendChild(v);
+  }
+
+  [[2, 2], [2, 6], [4, 4], [6, 2], [6, 6]].forEach(function (sc) {
+    const dot = document.createElementNS(svgNS, 'circle');
+    dot.setAttribute('cx', pad + sc[1] * cell);
+    dot.setAttribute('cy', pad + sc[0] * cell);
+    dot.setAttribute('r', '2.8');
+    dot.setAttribute('fill', '#3b2f1c');
+    svg.appendChild(dot);
+  });
+
+  // 좌표 라벨 (행 1~9 왼쪽, 열 1~9 아래)
+  for (let i = 0; i < size; i++) {
+    const rl = document.createElementNS(svgNS, 'text');
+    rl.setAttribute('x', pad - 14);
+    rl.setAttribute('y', pad + i * cell + 4);
+    rl.setAttribute('text-anchor', 'middle');
+    rl.setAttribute('font-size', '11');
+    rl.setAttribute('fill', '#6b5225');
+    rl.setAttribute('pointer-events', 'none');
+    rl.textContent = String(i + 1);
+    svg.appendChild(rl);
+    const cl = document.createElementNS(svgNS, 'text');
+    cl.setAttribute('x', pad + i * cell);
+    cl.setAttribute('y', vb - pad + 14);
+    cl.setAttribute('text-anchor', 'middle');
+    cl.setAttribute('font-size', '11');
+    cl.setAttribute('fill', '#6b5225');
+    cl.setAttribute('pointer-events', 'none');
+    cl.textContent = String(i + 1);
+    svg.appendChild(cl);
+  }
+
+  let map = stonesToMap(p);
+  if (played && played.board) map = played.board;
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const cx = pad + c * cell;
+      const cy = pad + r * cell;
+      const color = map.get(goKey(r, c));
+      if (color) {
+        const st = document.createElementNS(svgNS, 'circle');
+        st.setAttribute('cx', cx); st.setAttribute('cy', cy);
+        st.setAttribute('r', '14');
+        st.setAttribute('fill', color === 'B' ? '#111827' : '#f8fafc');
+        st.setAttribute('stroke', color === 'B' ? '#000000' : '#64748b');
+        st.setAttribute('stroke-width', '1.4');
+        svg.appendChild(st);
+      } else {
+        const hit = document.createElementNS(svgNS, 'circle');
+        hit.setAttribute('cx', cx); hit.setAttribute('cy', cy);
+        hit.setAttribute('r', '15');
+        hit.setAttribute('fill', 'transparent');
+        hit.setAttribute('class', 'board-hit');
+        hit.setAttribute('data-row', String(r));
+        hit.setAttribute('data-col', String(c));
+        hit.setAttribute('role', 'button');
+        hit.setAttribute('aria-label', (r + 1) + '행 ' + (c + 1) + '열 착수');
+        hit.addEventListener('click', function () { handleMove(r, c); });
+        svg.appendChild(hit);
+      }
+    }
+  }
+
+  // 마지막 수 표시 (돌 위에 그린다)
+  if (played && played.board) {
+    const mk = document.createElementNS(svgNS, 'circle');
+    mk.setAttribute('cx', pad + played.c * cell);
+    mk.setAttribute('cy', pad + played.r * cell);
+    mk.setAttribute('r', '6');
+    mk.setAttribute('fill', 'none');
+    mk.setAttribute('stroke', played.isCorrect ? '#22c55e' : '#ef4444');
+    mk.setAttribute('stroke-width', '3');
+    mk.setAttribute('pointer-events', 'none');
+    svg.appendChild(mk);
+  }
+  return svg;
+}
+
+/* ---------- 보드 렌더 (체스) ---------- */
+function renderChessBoard(p) {
+  const size = p.size;
+  const cell = 42;
+  const offsetX = 16;
+  const offsetY = 0;
+  const vbW = offsetX + cell * size;
+  const vbH = cell * size + 16;
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 ' + vbW + ' ' + vbH);
+  svg.setAttribute('class', 'board-svg');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', '8x8 체스판');
+
+  let pieces = p.pieces.map(function (x) { return { r: x.r, c: x.c, symbol: x.symbol, side: x.side }; });
+  if (played && played.isCorrect) {
+    const src = p.moverFrom;
+    pieces = pieces.filter(function (x) { return !(x.r === src.r && x.c === src.c); });
+    pieces = pieces.filter(function (x) { return !(x.r === p.answer.r && x.c === p.answer.c); });
+    pieces.push({ r: p.answer.r, c: p.answer.c, symbol: p.moverSymbol, side: 'W' });
+  }
+  const pmap = new Map();
+  pieces.forEach(function (x) { pmap.set(goKey(x.r, x.c), x); });
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const isLight = (r + c) % 2 === 0;
+      const sq = document.createElementNS(svgNS, 'rect');
+      sq.setAttribute('x', offsetX + c * cell);
+      sq.setAttribute('y', offsetY + r * cell);
+      sq.setAttribute('width', cell);
+      sq.setAttribute('height', cell);
+      let fill = isLight ? '#e2e8f0' : '#7c8ba1';
+      if (played && played.r === r && played.c === c) {
+        fill = played.isCorrect ? '#86efac' : '#fca5a5';
+      }
+      sq.setAttribute('fill', fill);
+      if (!played) {
+        sq.setAttribute('class', 'board-hit');
+        sq.setAttribute('role', 'button');
+        sq.addEventListener('click', (function (rr, cc) {
+          return function () { handleMove(rr, cc); };
+        })(r, c));
+      }
+      sq.setAttribute('aria-label', String.fromCharCode(97 + c) + (8 - r) + ' 칸');
+      svg.appendChild(sq);
+    }
+    const rl = document.createElementNS(svgNS, 'text');
+    rl.setAttribute('x', offsetX - 7);
+    rl.setAttribute('y', offsetY + r * cell + cell / 2 + 4);
+    rl.setAttribute('text-anchor', 'middle');
+    rl.setAttribute('font-size', '10');
+    rl.setAttribute('fill', '#94a3b8');
+    rl.textContent = String(8 - r);
+    svg.appendChild(rl);
+  }
+  for (let c = 0; c < size; c++) {
+    const cl = document.createElementNS(svgNS, 'text');
+    cl.setAttribute('x', offsetX + c * cell + cell / 2);
+    cl.setAttribute('y', offsetY + cell * size + 12);
+    cl.setAttribute('text-anchor', 'middle');
+    cl.setAttribute('font-size', '10');
+    cl.setAttribute('fill', '#94a3b8');
+    cl.textContent = String.fromCharCode(97 + c);
+    svg.appendChild(cl);
+  }
+
+  const SOLID = { '♔': '♚', '♕': '♛', '♖': '♜', '♘': '♞', '♗': '♝', '♙': '♟' };
+  pmap.forEach(function (x) {
+    const txt = document.createElementNS(svgNS, 'text');
+    txt.setAttribute('x', offsetX + x.c * cell + cell / 2);
+    txt.setAttribute('y', offsetY + x.r * cell + cell * 0.72);
+    txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('font-size', '29');
+    txt.setAttribute('pointer-events', 'none');
+    txt.setAttribute('fill', x.side === 'W' ? '#ffffff' : '#0b1220');
+    txt.setAttribute('stroke', x.side === 'W' ? '#0f172a' : '#e2e8f0');
+    txt.setAttribute('stroke-width', x.side === 'W' ? '1.4' : '0.9');
+    txt.textContent = x.side === 'W' ? (SOLID[x.symbol] || x.symbol) : x.symbol;
+    svg.appendChild(txt);
+  });
+  return svg;
+}
+
+/* ---------- 카드/탭 ---------- */
+function renderTabs() {
+  const wrap = document.getElementById('puzzleTabs');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const solved = solvedIds();
+  const dailyPuzzle = miniPuzzles[dailyIdx];
+  list.forEach(function (p, i) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'puzzle-tab' + (i === idx ? ' active' : '') + (solved.indexOf(p.id) !== -1 ? ' solved' : '');
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+    btn.setAttribute('data-idx', String(i));
+    const dot = document.createElement('span');
+    dot.className = 'dot ' + (DIFF_CLASS[p.difficulty] || 'mid');
+    btn.appendChild(dot);
+    btn.appendChild(document.createTextNode(typeName(p).slice(0, 1) + typeNo(p) + (p === dailyPuzzle ? '🎯' : '')));
+    btn.addEventListener('click', function () { selectIndex(i); });
+    wrap.appendChild(btn);
+  });
+  const active = wrap.querySelector('.puzzle-tab.active');
+  if (active && active.scrollIntoView) {
+    try { active.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) { /* ignore */ }
+  }
+}
+
+function renderBoardOnly() {
+  const p = current();
+  const wrap = document.getElementById('boardWrap');
+  if (!wrap || !p) return;
+  wrap.innerHTML = '';
+  wrap.appendChild(p.type === 'go' ? renderGoBoard(p) : renderChessBoard(p));
+}
+
+function renderFeedback(p, isCorrect) {
+  const box = document.getElementById('feedbackBox');
+  if (!box) return;
+  box.className = 'feedback-box show ' + (isCorrect ? 'ok' : 'ng');
+  const status = document.getElementById('feedbackStatus');
+  const text = document.getElementById('feedbackText');
+  const ans = document.getElementById('feedbackAnswer');
+  const src = document.getElementById('feedbackSource');
+  if (status) {
+    status.textContent = isCorrect ? '✅ 정답입니다! 완벽한 한 수예요.' : '❌ 아쉽습니다! 아래 해설을 확인하고 다시 도전해 보세요.';
+    status.style.color = isCorrect ? 'var(--correct)' : 'var(--wrong)';
+  }
+  if (text) text.textContent = p.explanation;
+  if (ans) ans.textContent = '정답: ' + p.answerText;
+  if (src) src.textContent = '출처: ' + p.source;
+}
+
+function renderPuzzle() {
+  const p = current();
+  if (!p) return;
+  const typePill = document.getElementById('puzzleTypePill');
+  const diffPill = document.getElementById('puzzleDiffPill');
+  const counter = document.getElementById('puzzleCounter');
+  const title = document.getElementById('puzzleTitle');
+  const prompt = document.getElementById('puzzlePrompt');
+  const fb = document.getElementById('feedbackBox');
+  const card = document.getElementById('puzzleCard');
+  const hintBox = document.getElementById('hintBox');
+  const hintBtn = document.getElementById('hintBtn');
+
+  if (typePill) typePill.textContent = p.typeLabel;
+  if (diffPill) {
+    diffPill.textContent = p.difficulty;
+    diffPill.className = 'diff-pill ' + (DIFF_CLASS[p.difficulty] || 'mid');
+  }
+  if (counter) counter.textContent = (idx + 1) + ' / ' + list.length;
+  if (title) title.textContent = p.title;
+  if (prompt) prompt.textContent = p.prompt;
+  if (fb) fb.className = 'feedback-box';
+  if (hintBox) {
+    hintBox.hidden = !hintShown;
+    hintBox.textContent = hintShown ? ('힌트: ' + p.hint) : '';
+  }
+  if (hintBtn) {
+    hintBtn.textContent = hintShown ? '🙈 힌트 숨기기' : '💡 힌트 보기';
+    hintBtn.setAttribute('aria-expanded', hintShown ? 'true' : 'false');
+  }
+  if (card) card.classList.toggle('is-daily', miniPuzzles.indexOf(p) === dailyIdx);
+
+  renderTabs();
+  renderBoardOnly();
+}
+
+function renderAll() {
+  renderProgress();
+  renderDaily();
+  renderPuzzle();
+}
+
+/* ---------- 조작 ---------- */
+function handleMove(r, c) {
+  const p = current();
+  if (!p || played) return;
+  const isCorrect = (r === p.answer.r && c === p.answer.c);
+
+  if (p.type === 'go') {
+    const base = stonesToMap(p);
+    const res = goPlay(base, r, c, p.playerColor || 'B', p.size);
+    if (!res.ok) {
+      if (res.reason === 'suicide') showToast('둘 수 없는 자리예요 — 자충수입니다.');
+      else showToast('이미 돌이 있는 자리예요.');
+      playTone('ng');
+      return;
+    }
+    played = { r: r, c: c, isCorrect: isCorrect, board: res.board };
+    if (isCorrect && res.captured.length) {
+      showToast('백 ' + res.captured.length + '점을 따냈습니다!');
+    }
+  } else {
+    played = { r: r, c: c, isCorrect: isCorrect, board: null };
+  }
+
+  playTone(isCorrect ? 'ok' : 'ng');
+  renderBoardOnly();
+  renderFeedback(p, isCorrect);
+  if (isCorrect) {
+    markSolved(p.id);
+    if (miniPuzzles.indexOf(p) === dailyIdx) markDailyDone(p);
+    renderTabs();
+  }
+}
+
+function selectIndex(i) {
+  idx = i;
+  played = null;
+  hintShown = false;
+  renderPuzzle();
+}
+
+function retryPuzzle() {
+  played = null;
+  hintShown = false;
+  renderPuzzle();
+}
+
+function nextPuzzle() {
+  idx = (idx + 1) % list.length;
+  played = null;
+  hintShown = false;
+  renderPuzzle();
+  const card = document.getElementById('puzzleCard');
+  if (card && card.scrollIntoView) {
+    try { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { /* ignore */ }
+  }
+}
+
+function toggleHint() {
+  hintShown = !hintShown;
+  const p = current();
+  const box = document.getElementById('hintBox');
+  const btn = document.getElementById('hintBtn');
+  if (box) {
+    box.hidden = !hintShown;
+    box.textContent = hintShown ? ('힌트: ' + p.hint) : '';
+  }
+  if (btn) {
+    btn.textContent = hintShown ? '🙈 힌트 숨기기' : '💡 힌트 보기';
+    btn.setAttribute('aria-expanded', hintShown ? 'true' : 'false');
+  }
+}
+
+function init() {
+  document.querySelectorAll('#typeFilters .filter-chip').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      typeFilter = btn.getAttribute('data-type');
+      syncChips();
+      applyFilter();
+    });
+  });
+  document.querySelectorAll('#diffFilters .filter-chip').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      diffFilter = btn.getAttribute('data-diff');
+      syncChips();
+      applyFilter();
+    });
+  });
+  const retryBtn = document.getElementById('retryBtn');
+  if (retryBtn) retryBtn.addEventListener('click', retryPuzzle);
+  const nextBtn = document.getElementById('nextBtn');
+  if (nextBtn) nextBtn.addEventListener('click', nextPuzzle);
+  const hintBtn = document.getElementById('hintBtn');
+  if (hintBtn) hintBtn.addEventListener('click', toggleHint);
+  const soundBtn = document.getElementById('soundToggleBtn');
+  if (soundBtn) {
+    soundBtn.addEventListener('click', function () {
+      soundEnabled = !soundEnabled;
+      soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+    });
+  }
+  const dailyBtn = document.getElementById('dailyBtn');
+  if (dailyBtn) {
+    dailyBtn.addEventListener('click', function () {
+      selectGlobal(dailyIdx);
+      showToast('오늘의 한 수: ' + typeName(miniPuzzles[dailyIdx]) + ' ' + typeNo(miniPuzzles[dailyIdx]) + '번 · ' + miniPuzzles[dailyIdx].difficulty);
+    });
+  }
+  // 오늘의 문제가 목록 첫 화면에서 바로 보이도록 시작 위치 지정
+  const info = kstDateKey();
+  dailyIdx = info.dayNumber % miniPuzzles.length;
+  list = miniPuzzles.slice();
+  idx = dailyIdx;
+  renderAll();
+  fitCoupangBanner();
+  [400, 1200, 2600, 4200].forEach(function (t) { window.setTimeout(fitCoupangBanner, t); });
+  window.addEventListener('resize', fitCoupangBanner);
+}
+
+/* ---------- 쿠팡 파트너스 배너: 680px 위젯을 화면 폭에 맞춰 축소 (가로 오버플로 0) ---------- */
+function fitCoupangBanner() {
+  const section = document.getElementById('affiliateSection');
+  const wrap = document.getElementById('coupangWrap');
+  const slot = document.getElementById('coupangSlot');
+  if (!section || !wrap || !slot) return;
+  const frame = slot.querySelector('iframe');
+  if (!frame) return;
+  const w = Number(frame.getAttribute('width')) || Number(frame.width) || 680;
+  const h = Number(frame.getAttribute('height')) || Number(frame.height) || 140;
+  if (!w || !h) return;
+  section.hidden = false;
+  const scale = Math.min(1, wrap.clientWidth / w);
+  slot.style.width = w + 'px';
+  slot.style.height = h + 'px';
+  slot.style.transform = 'scale(' + scale + ')';
+  wrap.style.height = Math.round(h * scale) + 'px';
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', init);
+}
+  </script>
+</body>
+</html>
