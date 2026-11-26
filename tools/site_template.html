@@ -385,6 +385,27 @@ body {
   font-family: inherit;
 }
 
+.affiliate-section { margin-bottom: 16px; }
+.affiliate-section[hidden] { display: none; }
+
+.coupang-wrap {
+  max-width: 100%;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.coupang-slot { transform-origin: top left; }
+
+.affiliate-note {
+  font-size: 0.69rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-top: 6px;
+  text-align: left;
+}
+
 .footer-links { display: flex; justify-content: center; gap: 4px 14px; flex-wrap: wrap; margin-bottom: 8px; }
 .footer-link {
   color: var(--accent);
@@ -489,6 +510,13 @@ body {
       <button type="button" class="btn-share" id="shareBtn">결과 공유하기</button>
     </section>
 
+    <section class="affiliate-section" id="affiliateSection" aria-label="쿠팡 파트너스 추천 상품" hidden>
+      <div class="coupang-wrap" id="coupangWrap">
+        <div class="coupang-slot" id="coupangSlot"></div>
+      </div>
+      <p class="affiliate-note">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+    </section>
+
     <nav class="cross-promo" aria-label="다른 콘텐츠">
       <h3>다른 콘텐츠</h3>
       <a class="web-card" href="https://not-opened.github.io/quiz/" rel="noopener">
@@ -519,6 +547,14 @@ body {
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- 쿠팡 파트너스 다이나믹 배너 (not-opened.github.io/go-chess 등록분) -->
+  <script src="https://ads-partners.coupang.com/g.js"></script>
+  <script>
+  new PartnersCoupang.G({"id":1059927,"template":"carousel","trackingCode":"AF2725831","width":"680","height":"140","tsource":"","container":"#coupangSlot","onLoaded":function(hasAd){
+    if (hasAd && typeof window.fitCoupangBanner === 'function') window.fitCoupangBanner();
+  }});
+  </script>
 
   <script>
 const miniPuzzles = __PUZZLES_JSON__;
@@ -1200,6 +1236,27 @@ function init() {
   const hashed = indexFromHash();
   idx = hashed >= 0 ? hashed : dailyIdx;
   renderAll();
+  fitCoupangBanner();
+  [400, 1200, 2600, 4200].forEach(function (t) { window.setTimeout(fitCoupangBanner, t); });
+  window.addEventListener('resize', fitCoupangBanner);
+}
+
+function fitCoupangBanner() {
+  const section = document.getElementById('affiliateSection');
+  const wrap = document.getElementById('coupangWrap');
+  const slot = document.getElementById('coupangSlot');
+  if (!section || !wrap || !slot) return;
+  const frame = slot.querySelector('iframe');
+  if (!frame) return;
+  const w = Number(frame.getAttribute('width')) || Number(frame.width) || 680;
+  const h = Number(frame.getAttribute('height')) || Number(frame.height) || 140;
+  if (!w || !h) return;
+  section.hidden = false;
+  const scale = Math.min(1, wrap.clientWidth / w);
+  slot.style.width = w + 'px';
+  slot.style.height = h + 'px';
+  slot.style.transform = 'scale(' + scale + ')';
+  wrap.style.height = Math.round(h * scale) + 'px';
 }
 
 const SITE_URL = 'https://not-opened.github.io/go-chess/';

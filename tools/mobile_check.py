@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""375px·320px 모바일 검증. 광고·외부 요청이 없고, 문항·공유·가로 넘침을 확인한다."""
+"""375px·320px 모바일 검증. 문항·공유·쿠팡 배너·가로 넘침을 확인한다."""
 import argparse
 import json
 import sys
 
 from playwright.sync_api import sync_playwright
 
-FORBIDDEN = ("coupang", "adsbygoogle", "googletagmanager", "gtag(", "AF2725831", "웹 1호", "웹 3호", "Zero-PII")
+FORBIDDEN = ("adsbygoogle", "googletagmanager", "gtag(", "웹 1호", "웹 3호", "Zero-PII")
 
 
 def run(url, shot_prefix, out_json):
@@ -43,6 +43,9 @@ def run(url, shot_prefix, out_json):
         html = page.content()
         for word in FORBIDDEN:
             check(f"페이지에 '{word}' 없음", word not in html)
+        check("쿠팡 스크립트 1회", html.count("https://ads-partners.coupang.com/g.js") == 1)
+        check("쿠팡 파트너 id", html.count('"id":1059927') == 1 and html.count('"trackingCode":"AF2725831"') == 1)
+        check("수수료 문구", html.count("이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.") == 1)
 
         check("한국어 제목", "바둑·체스 한 수 미니" in page.title(), page.title())
         check("canonical", page.locator('link[rel="canonical"]').get_attribute("href") == "https://not-opened.github.io/go-chess/")
@@ -190,8 +193,30 @@ def run(url, shot_prefix, out_json):
         c375 = touch_sizes()
         check("375 체스 칸 크기", (c375["sq"] or 0) >= 34, c375)
 
+        def settle_banner():
+            for _ in range(8):
+                page.evaluate("() => { if (window.fitCoupangBanner) window.fitCoupangBanner(); }")
+                has = page.evaluate("() => !!document.querySelector('#coupangSlot iframe')")
+                if has:
+                    break
+                page.wait_for_timeout(400)
+            page.wait_for_timeout(200)
+
+        settle_banner()
+        banner = page.evaluate("""() => {
+          const frame = document.querySelector('#coupangSlot iframe');
+          const note = document.querySelector('.affiliate-note');
+          return {hasFrame: !!frame, note: note ? note.textContent : '', w: frame ? frame.getAttribute('width') : null};
+        }""")
+        check("쿠팡 배너 iframe", banner["hasFrame"] is True, banner)
+        check("수수료 문구가 배너 옆", "쿠팡 파트너스 활동의 일환으로" in (banner["note"] or ""))
+        ov_ad = overflow()
+        check("375 배너 뒤 가로 넘침 없음", ov_ad["sw"] <= ov_ad["cw"] + 1, ov_ad)
+
         page.set_viewport_size({"width": 320, "height": 700})
         page.wait_for_timeout(250)
+        page.evaluate("() => { if (window.fitCoupangBanner) window.fitCoupangBanner(); }")
+        page.wait_for_timeout(200)
         ov320 = overflow()
         check("320 가로 넘침 없음", ov320["sw"] <= ov320["cw"] + 1, ov320)
         page.locator('#typeFilters .filter-chip[data-type="go"]').click()
@@ -218,9 +243,12 @@ def run(url, shot_prefix, out_json):
         pov = overflow()
         check("개인정보 320 가로 넘침 없음", pov["sw"] <= pov["cw"] + 1, pov)
         privacy_html = page.content()
-        check("개인정보 방침에 광고 스크립트 없음", "coupang" not in privacy_html and "adsbygoogle" not in privacy_html)
+        check("개인정보 방침에 쿠팡 쿠키 안내", "쿠팡" in privacy_html and "쿠키" in privacy_html)
+        check("개인정보에 자체 수집 없음", "개인정보" in privacy_html)
 
-        check("외부 요청 없음", not result["requests"], result["requests"][:8])
+        allowed = ("coupang.com", "coupangcdn.com")
+        unexpected = [u for u in result["requests"] if not any(host in u for host in allowed)]
+        check("쿠팡 외 외부 요청 없음", not unexpected, unexpected[:8])
 
         browser.close()
 
