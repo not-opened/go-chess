@@ -1368,6 +1368,9 @@ function renderJanggiBoard(p) {
       hit.setAttribute('class', 'jg-hit');
       hit.setAttribute('data-row', String(r));
       hit.setAttribute('data-col', String(c));
+      const occ0 = map.get(goKey(r, c));
+      hit.setAttribute('aria-label', (r + 1) + '행 ' + (c + 1) + '열' +
+        (occ0 ? ', ' + (occ0.side === 'han' ? '한 ' : '초 ') + (JG_NAME[occ0.kind] || '기물') : ''));
       hit.addEventListener('click', (function (rr, cc) {
         return function () { handleMove(rr, cc); };
       })(r, c));
