@@ -1,4 +1,4 @@
-"""notopened 바둑·체스 한 수 미니 v2.0 — 20문항 원본 데이터.
+"""notopened 바둑·체스 한 수 미니 — 20문항 원본 데이터.
 
 이 파일이 문항의 유일한 원본이다. render_puzzles.py 가 JSON 으로 바꿔 index.html 에 넣고,
 verify_puzzles.py 가 index.html 의 JSON 을 다시 읽어 규칙 검산을 한다.
@@ -49,7 +49,7 @@ GO = [
         id="go-04", difficulty="입문",
         title="4. 붙어 있는 두 점 한 번에 따내기",
         prompt="흑 차례입니다. 나란히 붙은 백 두 점을 한 수로 함께 들어내세요.",
-        hint="두 점은 붙어 있어 활로를 함께 씝니다. 그중 마지막 하나가 남아 있습니다.",
+        hint="두 점은 붙어 있어 활로를 함께 씁니다. 그중 마지막 하나가 남아 있습니다.",
         answer=(3, 2), answer_text="4행 3열",
         stones=[("B", 1, 2), ("B", 1, 3), ("B", 2, 1), ("B", 2, 4), ("B", 3, 3), ("W", 2, 2), ("W", 2, 3)],
         check=dict(kind="capture", count=2),
@@ -162,7 +162,7 @@ CHESS = [
         id="chess-03", difficulty="입문",
         title="3. 질식(스모더드) 메이트 (백선)",
         prompt="백 차례입니다. 백 나이트(♘, e5)로 흑 킹(♚, h8)을 단 한 수에 메이트로 몰아넣으세요.",
-        hint="흑 킹은 자기 룩과 폰 세 개에 둘러싸여 있습니다. 나이트가 들어갈 수 있는 칸은?",
+        hint="흑 킹은 자기 룩과 폰 두 개에 둘러싸여 있습니다. 나이트가 들어갈 수 있는 칸은?",
         fen="6rk/6pp/8/4N3/8/8/8/4K3 w - - 0 1",
         san="Nf7#", answer=(1, 5), answer_text="f7 (Nf7#)",
         check=dict(kind="mate"),
@@ -188,7 +188,7 @@ CHESS = [
         fen="q5k1/8/8/8/3B4/8/8/4K2R w - - 0 1",
         san="Rh8+", answer=(0, 7), answer_text="h8 (Rh8+)",
         check=dict(kind="skewer", target="a8"),
-        explanation="정답은 h8, Rh8+입니다. 룩은 비숍(d4)이 지켜 주므로 흑 킹(g8)이 잡을 수 없습니다. 흑 킹이 8랭크에 남으면 룩의 사정권이라 g7·f7로 물러날 수밖에 없고, 그 순간 룩이 a8의 퀸을 그대로 잡습니다(스큐어).",
+        explanation="정답은 h8, Rh8+입니다. 룩은 비숍(d4)이 지켜 주므로 흑 킹(g8)이 잡을 수 없습니다. g7도 그 비숍이 막고, 8랭크(f8·h8)는 룩의 사정권이라 흑은 f7로만 피할 수 있습니다. 킹이 비키면 룩이 a8의 퀸을 잡습니다(스큐어).",
         source=CHESS_SOURCE,
     ),
     dict(
@@ -199,7 +199,7 @@ CHESS = [
         fen="1K3N2/2R5/7k/6p1/8/8/6p1/8 w - - 0 1",
         san="Rh7#", answer=(1, 7), answer_text="h7 (Rh7#)",
         check=dict(kind="mate"),
-        explanation="정답은 h7, Rh7#입니다. f8의 나이트가 h7을 지키고 있어 흑 킹이 룩을 잡을 수 없고, g6·g7·h5도 모두 막혀 있습니다.",
+        explanation="정답은 h7, Rh7#입니다. f8의 나이트가 h7을 지키고 있어 흑 킹이 룩을 잡을 수 없습니다. g6은 나이트, g7은 룩이 막고, h5는 룩이 내려다보는 파일이며 g5는 흑 폰이라 갈 곳이 없습니다.",
         source=CHESS_SOURCE,
     ),
     dict(
@@ -210,7 +210,7 @@ CHESS = [
         fen="8/1R6/4k3/6Q1/3p1K2/8/8/8 w - - 0 1",
         san="Qe5#", answer=(3, 4), answer_text="e5 (Qe5#)",
         check=dict(kind="mate"),
-        explanation="정답은 e5, Qe5#입니다. 백 킹(f4)이 e5의 퀸을 지켜 흑 킹이 퀸을 잡을 수 없고, d5·d6·e7·f6·f5로 나가는 길도 퀸과 룩(b7)이 모두 막고 있습니다.",
+        explanation="정답은 e5, Qe5#입니다. 백 킹(f4)이 e5의 퀸을 지켜 흑 킹이 퀸을 잡을 수 없습니다. d5·d6·f5·f6은 퀸이, d7·e7·f7은 룩(b7)이 막아 나갈 칸이 없습니다.",
         source=CHESS_SOURCE,
     ),
     dict(
@@ -221,7 +221,7 @@ CHESS = [
         fen="4k3/3p1p2/8/2B1N3/8/8/8/4R1K1 w - - 0 1",
         san="Nc6#", answer=(2, 2), answer_text="c6 (Nc6#)",
         check=dict(kind="mate"),
-        explanation="정답은 c6, Nc6#입니다. 나이트가 e5를 비우자 e파일의 룩이 흑 킹(e8)을 체크합니다. c6의 나이트가 d8을, 비숍(c5)이 f8을 막고 d7·f7은 흑 폰이 막아 탈출로가 없습니다.",
+        explanation="정답은 c6, Nc6#입니다. 나이트가 e5를 비우자 e파일의 룩이 흑 킹(e8)을 체크합니다. e7은 그 룩의 사정권이고, c6의 나이트가 d8을, 비숍(c5)이 f8을 막습니다. d7·f7은 흑 폰이 막아 탈출로가 없습니다.",
         source=CHESS_SOURCE,
     ),
     dict(
@@ -243,7 +243,7 @@ CHESS = [
         fen="8/8/8/N7/k1K5/3p4/3Rp3/8 w - - 0 1",
         san="Ra2#", answer=(6, 0), answer_text="a2 (Ra2#)",
         check=dict(kind="mate"),
-        explanation="정답은 a2, Ra2#입니다. 룩이 a파일로 체크하면 흑 킹(a4)은 a3(룩), a5(킹이 비키면 룩이 지키는 자리), b5·b4·b3(백 킹 c4) 어디로도 갈 수 없고, 흑 폰으로는 체크를 막을 수 없습니다.",
+        explanation="정답은 a2, Ra2#입니다. 룩이 a파일로 체크하면 흑 킹(a4)은 a3으로 갈 수 없고, a5의 나이트를 잡아도 룩이 그 칸을 지킵니다. b3·b4·b5는 백 킹(c4)이 막으며, 흑 폰으로는 a3을 막을 수 없습니다.",
         source=CHESS_SOURCE,
     ),
 ]
