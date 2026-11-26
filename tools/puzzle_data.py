@@ -1,13 +1,16 @@
-"""notopened 바둑·체스 한 수 미니 — 20문항 원본 데이터.
+"""notopened 바둑·체스·장기 한 수 미니 — 30문항 원본 데이터.
 
 이 파일이 문항의 유일한 원본이다. render_puzzles.py 가 JSON 으로 바꿔 index.html 에 넣고,
 verify_puzzles.py 가 index.html 의 JSON 을 다시 읽어 규칙 검산을 한다.
 """
 import chess
 
+import janggi as J
+
 GO_SOURCE_RULES = "한국기원 바둑 규칙"
 GO_SOURCE_BEGIN = "한국기원 바둑 입문 가이드"
 CHESS_SOURCE = "FIDE Laws of Chess"
+JANGGI_SOURCE = "한국 장기 정식 규칙"
 
 # ---------------------------------------------------------------- 바둑 10문항
 
@@ -248,7 +251,113 @@ CHESS = [
     ),
 ]
 
-ALL = GO + CHESS
+# ---------------------------------------------------------------- 장기 10문항
+# 좌표는 r=0 이 맨 윗줄(초 진영), c=0 이 맨 왼쪽. side: "han"(漢·아래·빨강) / "cho"(楚·위·청록)
+# kind: K 漢/楚 · R 車 · P 包 · M 馬 · E 象 · G 士 · S 兵/卒
+JANGGI = [
+    dict(
+        id="janggi-01", difficulty="입문",
+        title="1. 차 두 개로 궁성 옆줄을 자른다",
+        prompt="한(漢) 차례입니다. 초(楚) 궁이 궁성 오른쪽 모서리(3행 6열)에 있습니다. 차를 움직여 단 한 수 외통을 만드세요.",
+        hint="아래쪽 차를 3행으로 올려 옆에서 장군을 걸 수 있습니다. 2행은 이미 다른 차가 통째로 막고 있습니다.",
+        pieces=[("cho", "K", 2, 5), ("han", "R", 8, 6), ("han", "R", 1, 1), ("han", "K", 8, 3)],
+        answer=((8, 6), (2, 6)), answer_text="차 9행 7열 → 3행 7열",
+        explanation="정답은 9행 7열의 차를 3행 7열로 올리는 수입니다. 차가 초 궁 바로 옆 3행에서 장군을 걸면, 3행 5열은 같은 줄의 차가 막고 2행 5열·2행 6열은 2행 2열의 차가 2행을 통째로 막고 있어 초 궁이 빠져나갈 곳이 없습니다.",
+        source=JANGGI_SOURCE,
+    ),
+    dict(
+        id="janggi-02", difficulty="입문",
+        title="2. 마 두 개의 협공으로 외통",
+        prompt="한(漢) 차례입니다. 초 궁이 궁성 왼쪽 아래 모서리(3행 4열)에 있습니다. 마를 뛰게 해 단 한 수 외통을 만드세요.",
+        hint="장군을 걸 마는 초 궁보다 한 줄 위쪽에 있습니다. 다른 마가 2행 4열과 3행 5열을 이미 막고 있습니다.",
+        pieces=[("cho", "K", 2, 3), ("han", "M", 3, 2), ("han", "M", 1, 0), ("han", "K", 8, 5)],
+        answer=((1, 0), (0, 2)), answer_text="마 2행 1열 → 1행 3열",
+        explanation="정답은 2행 1열의 마를 1행 3열로 뛰게 하는 수입니다. 마는 1행 3열에서 초 궁을 장군하면서 2행 5열까지 함께 노립니다. 2행 4열과 3행 5열은 4행 3열의 다른 마가 이미 막고 있어 초 궁은 제자리에서 벗어날 수 없습니다.",
+        source=JANGGI_SOURCE,
+    ),
+    dict(
+        id="janggi-03", difficulty="입문",
+        title="3. 차가 세로줄을 뚫고, 상이 옆을 막는다",
+        prompt="한(漢) 차례입니다. 초 궁이 궁성 왼쪽 아래 모서리에 있고 그 옆 2행 5열은 초의 차가 막고 있습니다. 아래쪽 큰 차를 올려 단 한 수 외통을 만드세요.",
+        hint="차는 같은 세로줄에서 장군을 걸면 됩니다. 초 궁이 옆으로 비켜설 3행 5열은 상이 이미 지키고 있습니다.",
+        pieces=[("cho", "K", 2, 3), ("cho", "R", 1, 4), ("han", "R", 9, 6), ("han", "E", 0, 7), ("han", "K", 8, 5)],
+        answer=((9, 6), (9, 3)), answer_text="차 10행 7열 → 10행 4열",
+        explanation="정답은 10행 7열의 차를 10행 4열로 옮기는 수입니다. 차가 4열을 뚫고 올라가 초 궁에 장군을 걸고, 초 궁이 2행 4열로 물러나도 같은 세로줄이라 장군이 그대로입니다. 3행 5열은 1행 8열의 상이 막고, 2행 5열은 초의 차가 스스로 막고 있어 외통입니다.",
+        source=JANGGI_SOURCE,
+    ),
+    dict(
+        id="janggi-04", difficulty="입문",
+        title="4. 잡으면서 거는 장군",
+        prompt="한(漢) 차례입니다. 초 궁 옆 2행 5열에 초의 졸이 있습니다. 그 졸을 잡으면서 장군을 거는 한 수를 찾으세요.",
+        hint="차로 그 졸을 잡으면 옆에서 장군이 됩니다. 그 차를 지켜 주는 아군 마가 있는지 확인하세요.",
+        pieces=[("cho", "K", 2, 3), ("cho", "S", 1, 4), ("han", "R", 0, 4), ("han", "M", 2, 6), ("han", "K", 9, 5)],
+        answer=((0, 4), (1, 4)), answer_text="차 1행 5열 → 2행 5열",
+        explanation="정답은 1행 5열의 차로 2행 5열의 초 졸을 잡는 수입니다. 차는 궁성 한가운데에 서면서 궁성 대각선을 따라 3행 4열의 초 궁을 겨눕니다. 이 차는 3행 7열의 마가 지키고 있어 초 궁이 잡을 수 없고, 2행 4열·3행 5열 도피로도 그 차가 같은 줄에서 막고 있습니다.",
+        source=JANGGI_SOURCE + " · 궁성 대각선",
+    ),
+    dict(
+        id="janggi-05", difficulty="중급",
+        title="5. 궁성으로 들어가는 졸의 외통",
+        prompt="한(漢) 차례입니다. 초 궁이 궁성 왼쪽 위 모서리(1행 4열)에 있습니다. 졸을 궁성 안으로 들여 단 한 수 외통을 만드세요.",
+        hint="졸은 적 궁성 안에서 대각선으로도 한 칸 갈 수 있습니다. 그 자리에서 궁의 앞칸과 옆칸을 함께 막습니다.",
+        pieces=[("cho", "K", 0, 3), ("han", "S", 2, 4), ("han", "R", 6, 4), ("han", "K", 8, 5)],
+        answer=((2, 4), (1, 4)), answer_text="졸 3행 5열 → 2행 5열",
+        explanation="정답은 3행 5열의 졸을 2행 5열(궁성 한가운데)로 들이는 수입니다. 졸은 적 궁성 안에서 대각선으로 한 칸 나아갈 수 있어, 이 자리에서 초 궁을 장군하면서 앞칸 1행 5열과 옆칸 2행 4열을 함께 막습니다. 졸 자신은 7행 5열의 차가 지켜 초 궁이 잡을 수 없습니다.",
+        source=JANGGI_SOURCE + " · 졸의 궁성 대각선",
+    ),
+    dict(
+        id="janggi-06", difficulty="중급",
+        title="6. 차와 마가 궁성을 나눠 막는다",
+        prompt="한(漢) 차례입니다. 초 궁이 궁성 오른쪽 아래 모서리(3행 6열)에 있고 그 위 2행 6열은 초의 사가 막고 있습니다. 차로 장군을 걸어 외통을 만드세요.",
+        hint="차를 3행으로 옮기면 옆에서 장군이 됩니다. 궁성 가운데로 빠지는 길은 마가 이미 막고 있습니다.",
+        pieces=[("cho", "K", 2, 5), ("cho", "G", 1, 5), ("han", "M", 3, 5), ("han", "R", 4, 1), ("han", "K", 8, 5)],
+        answer=((4, 1), (2, 1)), answer_text="차 5행 2열 → 3행 2열",
+        explanation="정답은 5행 2열의 차를 3행 2열로 올리는 수입니다. 차가 3행에서 옆으로 장군을 걸면 3행 5열은 같은 줄의 차가 막고, 2행 5열(궁성 가운데)은 4행 6열의 마가 막습니다. 2행 6열은 초의 사가 스스로 자리를 잡고 있어 초 궁이 나갈 곳이 없습니다.",
+        source=JANGGI_SOURCE,
+    ),
+    dict(
+        id="janggi-07", difficulty="중급",
+        title="7. 차를 붙여 세로줄을 막는 외통",
+        prompt="한(漢) 차례입니다. 초 궁이 궁성 오른쪽 가운데(2행 6열)에 있습니다. 차를 붙여 단 한 수 외통을 만드세요.",
+        hint="차를 초 궁 바로 옆칸으로 보내면 세로줄 두 칸이 한꺼번에 막힙니다. 그 차는 아군 마와 졸이 지키고 있습니다.",
+        pieces=[("cho", "K", 1, 5), ("han", "M", 3, 5), ("han", "R", 3, 4), ("han", "S", 2, 3), ("cho", "S", 5, 8), ("han", "K", 8, 3)],
+        answer=((3, 4), (1, 4)), answer_text="차 4행 5열 → 2행 5열",
+        explanation="정답은 4행 5열의 차를 2행 5열로 붙이는 수입니다. 차가 초 궁 바로 옆에서 장군을 걸면 1행 6열·3행 6열은 같은 세로줄의 차가 막습니다. 차를 잡으려 해도 4행 6열의 마와 3행 4열의 졸이 지키고 있어 초 궁은 손을 댈 수 없습니다.",
+        source=JANGGI_SOURCE,
+    ),
+    dict(
+        id="janggi-08", difficulty="고급",
+        title="8. 궁성 대각선을 타는 차",
+        prompt="한(漢) 차례입니다. 초 궁이 궁성 오른쪽 아래 모서리(3행 6열)에 있고 그 위 2행 6열은 초의 상이 막고 있습니다. 차를 궁성 모서리로 보내 단 한 수 외통을 만드세요.",
+        hint="차는 궁성 안에서 대각선으로도 다닙니다. 모서리에 서면 2행 5열을 거쳐 초 궁까지 한 줄로 이어집니다.",
+        pieces=[("cho", "K", 2, 5), ("cho", "E", 1, 5), ("han", "M", 3, 6), ("han", "R", 0, 8), ("han", "K", 9, 3)],
+        answer=((0, 8), (0, 3)), answer_text="차 1행 9열 → 1행 4열",
+        explanation="정답은 1행 9열의 차를 1행 4열로 옮기는 수입니다. 차가 궁성 모서리에 서면 궁성 대각선을 따라 2행 5열을 지나 3행 6열의 초 궁을 바로 겨눕니다. 초 궁이 2행 5열로 비켜서도 그 대각선 위라 장군이 그대로이고, 3행 5열은 4행 7열의 마가 막고, 2행 6열은 초의 상이 스스로 막고 있어 외통입니다.",
+        source=JANGGI_SOURCE + " · 궁성 대각선",
+    ),
+    dict(
+        id="janggi-09", difficulty="고급",
+        title="9. 포가 비켜서 차의 장군이 열린다",
+        prompt="한(漢) 차례입니다. 6열에서 우리 차의 장군이 포에 가로막혀 있습니다. 포를 움직여 단 한 수 외통을 만드세요.",
+        hint="포는 반드시 기물 하나를 넘어야 움직입니다. 아군 차를 딛고 그 뒤로 내려가면 막힌 세로줄이 열립니다.",
+        pieces=[("cho", "K", 0, 5), ("han", "P", 3, 5), ("han", "R", 6, 5), ("han", "R", 3, 4), ("han", "P", 3, 3), ("cho", "S", 3, 1), ("han", "K", 8, 5)],
+        answer=((3, 5), (7, 5)), answer_text="포 4행 6열 → 8행 6열",
+        explanation="정답은 4행 6열의 포를 8행 6열로 내리는 수입니다. 포가 7행 6열의 아군 차를 넘어 그 뒤로 비키면, 차가 막힘없이 6열을 뚫고 1행 6열의 초 궁에 장군을 겁니다. 초 궁이 2행 6열로 내려와도 그 차가 같은 줄에서 막고, 1행 5열·2행 5열은 4행 5열의 차가 이미 막고 있어 외통입니다.",
+        source=JANGGI_SOURCE + " · 발견 장군",
+    ),
+    dict(
+        id="janggi-10", difficulty="고급",
+        title="10. 두 마의 그물 — 궁성 구석 외통",
+        prompt="한(漢) 차례입니다. 초 궁이 궁성 왼쪽 아래 모서리(3행 4열)에 있고 그 위 2행 4열은 초의 사가 막고 있습니다. 마를 뛰게 해 단 한 수 외통을 만드세요.",
+        hint="장군을 걸 마는 궁성 오른쪽 아래 바깥에 있습니다. 그 자리에서 초 궁과 궁성 가운데를 동시에 노립니다.",
+        pieces=[("cho", "K", 2, 3), ("cho", "G", 1, 3), ("han", "M", 4, 3), ("han", "M", 4, 7), ("han", "R", 9, 0), ("han", "K", 8, 3)],
+        answer=((4, 7), (3, 5)), answer_text="마 5행 8열 → 4행 6열",
+        explanation="정답은 5행 8열의 마를 4행 6열로 뛰게 하는 수입니다. 마는 4행 6열에서 초 궁을 장군하면서 2행 5열 도피로까지 함께 막습니다. 3행 5열은 5행 4열의 다른 마가 막고, 2행 4열은 초의 사가 스스로 막고 있어 초 궁이 나갈 곳이 없습니다.",
+        source=JANGGI_SOURCE,
+    ),
+]
+
+ALL = GO + CHESS + JANGGI
 
 PIECE_SYMBOL = {
     (chess.PAWN, chess.WHITE): "♙", (chess.KNIGHT, chess.WHITE): "♘",
@@ -285,21 +394,40 @@ def chess_pieces(fen, san):
     return out, PIECE_SYMBOL[(mover_piece.piece_type, mover_piece.color)], move
 
 
+def janggi_pieces(pieces, answer_from):
+    """[(side, kind, r, c)] → 화면용 기물 목록(착수 기물에 mover 표시)."""
+    out = []
+    for side, kind, r, c in pieces:
+        out.append(dict(
+            r=r, c=c, kind=kind, side=side,
+            symbol=J.SYMBOL[side][kind],
+            mover=(r, c) == tuple(answer_from),
+        ))
+    out.sort(key=lambda p: (p["r"], p["c"]))
+    return out
+
+
 def to_json():
     puzzles = []
     for p in ALL:
+        if p["id"].startswith("go"):
+            typ = "go"
+        elif p["id"].startswith("chess"):
+            typ = "chess"
+        else:
+            typ = "janggi"
         item = dict(
-            id=p["id"], type="go" if p["id"].startswith("go") else "chess",
+            id=p["id"], type=typ,
             difficulty=p["difficulty"], title=p["title"], prompt=p["prompt"],
             hint=p["hint"], explanation=p["explanation"], source=p["source"],
-            answerText=p["answer_text"], check=p["check"],
+            answerText=p["answer_text"], check=p.get("check") or dict(kind="mate"),
         )
         if item["type"] == "go":
             item["typeLabel"] = "⚫ 바둑 9×9"
             item["size"] = 9
             item["stones"] = [dict(r=r, c=c, color=col) for col, r, c in p["stones"]]
             item["answer"] = dict(r=p["answer"][0], c=p["answer"][1])
-        else:
+        elif item["type"] == "chess":
             pieces, mover_symbol, move = chess_pieces(p["fen"], p["san"])
             item["typeLabel"] = "♟️ 체스 8×8"
             item["size"] = 8
@@ -309,6 +437,13 @@ def to_json():
             item["moverSymbol"] = mover_symbol
             item["moverFrom"] = dict(r=7 - chess.square_rank(move.from_square), c=chess.square_file(move.from_square))
             item["answer"] = dict(r=p["answer"][0], c=p["answer"][1])
+        else:
+            src, dst = p["answer"]
+            item["typeLabel"] = "🏮 장기 9×10"
+            item["rows"] = 10
+            item["cols"] = 9
+            item["pieces"] = janggi_pieces(p["pieces"], src)
+            item["answer"] = {"from": dict(r=src[0], c=src[1]), "to": dict(r=dst[0], c=dst[1])}
         puzzles.append(item)
     return puzzles
 

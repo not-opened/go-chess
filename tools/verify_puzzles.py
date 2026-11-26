@@ -20,6 +20,7 @@ from goban import Board
 from predicates import (
     is_capture, double_atari, atari_dead, ko_move, two_eyes, eyes_count,
 )
+import janggi as J
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -260,6 +261,72 @@ def verify_chess(p):
     return detail
 
 
+# ------------------------------------------------------------------ 장기 검산
+
+JANGGI_NAME = {"R": "차", "P": "포", "M": "마", "E": "상", "G": "사", "S": "졸", "K": "궁"}
+
+
+def verify_janggi(p):
+    rows, cols = p["rows"], p["cols"]
+    assert rows == 10 and cols == 9, f"{p['id']}: 판 크기 {rows}x{cols}"
+    pieces = []
+    for pc in p["pieces"]:
+        pieces.append((pc["side"], pc["kind"], pc["r"], pc["c"]))
+    board = J.from_pieces(pieces)
+    probs = J.position_problems(board)
+    assert not probs, f"{p['id']}: 국면 오류 {probs}"
+
+    src = (p["answer"]["from"]["r"], p["answer"]["from"]["c"])
+    dst = (p["answer"]["to"]["r"], p["answer"]["to"]["c"])
+
+    # 화면에 그린 기물이 국면과 일치하고, 착수 기물이 하나뿐이며 출발칸에 있는지
+    assert len(p["pieces"]) == len(board), f"{p['id']}: 기물 수 불일치"
+    movers = [pc for pc in p["pieces"] if pc["mover"]]
+    assert len(movers) == 1, f"{p['id']}: mover 기물 {len(movers)}개"
+    assert (movers[0]["r"], movers[0]["c"]) == src, f"{p['id']}: mover 위치가 출발칸과 다름"
+    mover_kind = board[src][0]
+    assert movers[0]["kind"] == mover_kind, f"{p['id']}: mover 종류 불일치"
+    assert movers[0]["symbol"] == J.SYMBOL[board[src][1]][mover_kind], f"{p['id']}: 기물 글자 불일치"
+    for pc in p["pieces"]:
+        assert pc["symbol"] == J.SYMBOL[pc["side"]][pc["kind"]], f"{p['id']}: 글자 오류 {pc}"
+
+    # 정답이 합법수이고, 그 수가 유일한 1수 외통인지
+    legal = J.legal_moves(board, J.HAN)
+    assert (src, dst) in legal, f"{p['id']}: 정답 {src}->{dst} 이 합법수가 아님"
+    mates = J.mate_moves(board, J.HAN)
+    assert mates == [(src, dst)], f"{p['id']}: 1수 외통이 {len(mates)}개 → {mates}"
+
+    nb, cap = J.apply_move(board, src, dst)
+    assert J.in_check(nb, J.CHO), f"{p['id']}: 정답 뒤 초가 장군이 아님"
+    assert not J.legal_moves(nb, J.CHO), f"{p['id']}: 정답 뒤 초에게 합법수가 있음"
+    # 도피로가 모두 공격당해 막혔는지(빅장으로만 막힌 도피로가 없는지)
+    ck = J.find_king(nb, J.CHO)
+    for sq in J.pseudo_moves(nb, ck[0], ck[1]):
+        t = nb.get(sq)
+        if t is not None and t[1] == J.CHO:
+            continue
+        nk, _ = J.apply_move(nb, ck, sq)
+        if J.kings_face(nk):
+            raise AssertionError(f"{p['id']}: 도피로 {sq} 가 빅장으로만 막힘")
+        if not J.attackers(nk, sq, J.HAN):
+            raise AssertionError(f"{p['id']}: 도피로 {sq} 가 비어 있음")
+
+    # 정답 표기 검사: "차 9행 7열 → 3행 7열"
+    m = re.match(r"^(차|포|마|상|사|졸|병|궁) (\d+)행 (\d+)열 → (\d+)행 (\d+)열$", p["answerText"])
+    assert m, f"{p['id']}: answerText 형식 오류 {p['answerText']}"
+    assert m.group(1) == JANGGI_NAME[mover_kind], f"{p['id']}: answerText 기물 이름 불일치"
+    assert (int(m.group(2)) - 1, int(m.group(3)) - 1) == src, f"{p['id']}: answerText 출발칸 불일치"
+    assert (int(m.group(4)) - 1, int(m.group(5)) - 1) == dst, f"{p['id']}: answerText 도착칸 불일치"
+
+    # 힌트에 정답 좌표가 노출되지 않아야 한다
+    for rc in (src, dst):
+        coord = "%d행 %d열" % (rc[0] + 1, rc[1] + 1)
+        assert coord not in p["hint"], f"{p['id']}: 힌트에 정답 좌표 노출({coord})"
+
+    cap_txt = "" if cap is None else f", {J.SYMBOL[cap[1]][cap[0]]} 잡음"
+    return "유일한 1수 외통" + cap_txt + (", 궁성 대각선" if any(dst == pts[0] for pts in J.diag_rays(src[0], src[1])) else "")
+
+
 # ------------------------------------------------------------------ 전체
 
 def load_from_index(path):
@@ -283,17 +350,18 @@ def main():
     else:
         puzzles = load_from_index(os.path.join(ROOT, "index.html"))
 
-    assert len(puzzles) == 20, f"문항 수 {len(puzzles)} (20 기대)"
+    assert len(puzzles) == 30, f"문항 수 {len(puzzles)} (30 기대)"
     ids = [p["id"] for p in puzzles]
     assert len(set(ids)) == len(ids), "중복 id"
-    assert sum(1 for p in puzzles if p["type"] == "go") == 10, "바둑 10문항 아님"
-    assert sum(1 for p in puzzles if p["type"] == "chess") == 10, "체스 10문항 아님"
+    for typ, label in (("go", "바둑"), ("chess", "체스"), ("janggi", "장기")):
+        assert sum(1 for p in puzzles if p["type"] == typ) == 10, f"{label} 10문항 아님"
     for p in puzzles:
         assert p["difficulty"] in ("입문", "중급", "고급"), f"{p['id']}: 난이도 {p['difficulty']}"
         for key in ("title", "prompt", "hint", "explanation", "source", "answerText"):
             assert p.get(key), f"{p['id']}: {key} 비어 있음"
         # 힌트에 정답 좌표가 그대로 노출되지 않아야 한다
-        assert p["answerText"].split(" ")[0] not in p["hint"], f"{p['id']}: 힌트에 정답 노출"
+        if p["type"] != "janggi":
+            assert p["answerText"].split(" ")[0] not in p["hint"], f"{p['id']}: 힌트에 정답 노출"
 
     rows = []
     ok = 0
@@ -301,8 +369,10 @@ def main():
         try:
             if p["type"] == "go":
                 detail = verify_go(p)
-            else:
+            elif p["type"] == "chess":
                 detail = verify_chess(p)
+            else:
+                detail = verify_janggi(p)
             rows.append((p["id"], p["difficulty"], p["type"], "PASS", detail))
             ok += 1
         except AssertionError as e:

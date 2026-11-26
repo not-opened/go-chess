@@ -3,33 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>바둑·체스 한 수 미니 | notopened</title>
-  <meta name="description" content="설치 없이 브라우저에서 바로 푸는 바둑 사활·따내기와 체스 체크메이트. 입문·중급·고급 20문항과 매일 바뀌는 오늘의 한 수.">
+  <title>바둑·체스·장기 한 수 미니 | notopened</title>
+  <meta name="description" content="설치 없이 브라우저에서 바로 푸는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수. 입문·중급·고급 30문항과 매일 바뀌는 오늘의 한 수.">
   <link rel="canonical" href="https://not-opened.github.io/go-chess/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ko_KR">
   <meta property="og:site_name" content="notopened">
-  <meta property="og:title" content="바둑·체스 한 수 미니">
-  <meta property="og:description" content="단 한 수로 승부를 가르는 바둑 사활·따내기와 체스 체크메이트 퍼즐 20문항.">
+  <meta property="og:title" content="바둑·체스·장기 한 수 미니">
+  <meta property="og:description" content="단 한 수로 승부를 가르는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수 퍼즐 30문항.">
   <meta property="og:url" content="https://not-opened.github.io/go-chess/">
   <meta property="og:image" content="https://not-opened.github.io/go-chess/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="바둑판과 체스판이 있는 바둑·체스 한 수 미니">
+  <meta property="og:image:alt" content="바둑판과 체스판, 장기판이 있는 바둑·체스·장기 한 수 미니">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="바둑·체스 한 수 미니">
-  <meta name="twitter:description" content="단 한 수로 승부를 가르는 바둑 사활·따내기와 체스 체크메이트 퍼즐 20문항.">
+  <meta name="twitter:title" content="바둑·체스·장기 한 수 미니">
+  <meta name="twitter:description" content="단 한 수로 승부를 가르는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수 퍼즐 30문항.">
   <meta name="twitter:image" content="https://not-opened.github.io/go-chess/og.png">
-  <meta name="twitter:image:alt" content="바둑판과 체스판이 있는 바둑·체스 한 수 미니">
+  <meta name="twitter:image:alt" content="바둑판과 체스판, 장기판이 있는 바둑·체스·장기 한 수 미니">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "바둑·체스 한 수 미니",
-    "alternateName": "notopened 바둑·체스 한 수 미니",
+    "name": "바둑·체스·장기 한 수 미니",
+    "alternateName": "notopened 바둑·체스·장기 한 수 미니",
     "url": "https://not-opened.github.io/go-chess/",
     "inLanguage": "ko",
-    "description": "설치 없이 브라우저에서 바로 푸는 바둑 사활·따내기와 체스 체크메이트 한 수 퍼즐 20문항.",
+    "description": "설치 없이 브라우저에서 바로 푸는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수 한 수 퍼즐 30문항.",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Any",
     "isAccessibleForFree": true,
@@ -77,23 +77,43 @@ body {
 
 .portal-header { text-align: center; margin-bottom: 12px; }
 
-.header-top-row {
+/* 상단 슬림 유튜브 배너 */
+.yt-banner {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  gap: 8px;
-}
-
-.badge {
-  display: inline-block;
-  font-size: 0.7rem;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 12px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(239, 68, 68, 0.06));
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: var(--text-main);
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  padding: 4px 10px;
-  border-radius: 999px;
+  line-height: 1.22;
+  text-decoration: none;
+  text-align: center;
+  overflow: hidden;
+}
+.yt-banner:active { background: linear-gradient(135deg, rgba(239, 68, 68, 0.32), rgba(239, 68, 68, 0.10)); }
+.yt-banner .yt-ico { color: #f87171; font-size: 0.82rem; flex: 0 0 auto; }
+.yt-banner .yt-text { min-width: 0; }
+.yt-banner .yt-arrow { color: #fca5a5; flex: 0 0 auto; }
+
+.title-row { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+.title-row .icon-toggle-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  font-size: 0.9rem;
 }
 
 .icon-toggle-btn {
@@ -108,7 +128,7 @@ body {
   flex: 0 0 auto;
 }
 
-.portal-header h1 { font-size: 1.32rem; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.01em; }
+.portal-header h1 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0; padding: 0 44px; letter-spacing: -0.01em; }
 
 .portal-header > p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; }
 
@@ -276,6 +296,22 @@ body {
 
 .board-hit { cursor: pointer; }
 .board-hit:hover { fill: rgba(56, 189, 248, 0.25); }
+
+/* ---------- 장기판 ---------- */
+.jg-piece { font-weight: 700; }
+@media (hover: hover) {
+  .jg-hit:hover { fill: rgba(56, 189, 248, 0.16); }
+}
+.jg-legend {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: -4px 0 12px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.jg-legend i { font-style: normal; font-weight: 800; }
 
 .hint-btn {
   width: 100%;
@@ -446,13 +482,17 @@ body {
 </head>
 <body>
   <main class="container">
+    <a class="yt-banner" href="https://www.youtube.com/@notopened" target="_blank" rel="noopener noreferrer" aria-label="notopened 공식 유튜브 새 창으로 열기">
+      <span class="yt-ico" aria-hidden="true">▶</span>
+      <span class="yt-text">notopened 공식 유튜브 — 매일 한 수·상식 쇼츠 보러가기</span>
+      <span class="yt-arrow" aria-hidden="true">→</span>
+    </a>
     <header class="portal-header" role="banner">
-      <div class="header-top-row">
-        <span class="badge">notopened</span>
+      <div class="title-row">
+        <h1>바둑 · 체스 · 장기 한 수 미니</h1>
         <button type="button" class="icon-toggle-btn" id="soundToggleBtn" aria-label="효과음 켜기/끄기" title="효과음 켜기/끄기">🔊</button>
       </div>
-      <h1>바둑 · 체스 한 수 미니</h1>
-      <p>단 한 수로 끝내는 30초 두뇌 퍼즐 · 입문부터 고급까지 20문항</p>
+      <p>단 한 수로 끝내는 30초 두뇌 퍼즐 · 입문부터 고급까지 30문항</p>
       <button type="button" class="daily-btn" id="dailyBtn" aria-label="오늘의 한 수 바로 풀기">
         <span class="daily-icon" id="dailyIcon">🎯</span>
         <span class="daily-text">
@@ -464,9 +504,10 @@ body {
 
     <nav class="filter-bar" id="typeFilters" aria-label="종목 필터">
       <span class="filter-label">종목</span>
-      <button type="button" class="filter-chip active" data-type="all">전체 20</button>
+      <button type="button" class="filter-chip active" data-type="all">전체 30</button>
       <button type="button" class="filter-chip" data-type="go">⚫ 바둑 10</button>
       <button type="button" class="filter-chip" data-type="chess">♟️ 체스 10</button>
+      <button type="button" class="filter-chip" data-type="janggi">🏮 장기 10</button>
     </nav>
 
     <nav class="filter-bar" id="diffFilters" aria-label="난이도 필터">
@@ -477,7 +518,7 @@ body {
       <button type="button" class="filter-chip" data-diff="고급">고급</button>
     </nav>
 
-    <p class="progress-line">푼 문제 <b id="solvedCount">0</b> / 20</p>
+    <p class="progress-line">푼 문제 <b id="solvedCount">0</b> / <span id="totalCount">30</span></p>
 
     <div class="puzzle-tabs" id="puzzleTabs" role="tablist" aria-label="문제 선택"></div>
 
@@ -492,6 +533,10 @@ body {
       <p class="puzzle-prompt" id="puzzlePrompt">보드의 정답 위치를 탭해 한 수를 두세요.</p>
 
       <div class="board-wrap" id="boardWrap"></div>
+      <div class="jg-legend" id="janggiLegend" hidden>
+        <span><i style="color:#dc2626">漢</i> 한(漢) · 나</span>
+        <span><i style="color:#0d9488">楚</i> 초(楚) · 상대</span>
+      </div>
 
       <button type="button" class="hint-btn" id="hintBtn" aria-expanded="false" aria-controls="hintBox">💡 힌트 보기</button>
       <div class="hint-box" id="hintBox" hidden></div>
@@ -596,6 +641,8 @@ function markSolved(id) {
 function renderProgress() {
   const el = document.getElementById('solvedCount');
   if (el) el.textContent = String(Math.min(solvedIds().length, miniPuzzles.length));
+  const total = document.getElementById('totalCount');
+  if (total) total.textContent = String(miniPuzzles.length);
 }
 
 /* ---------- 날짜(한국 시간) 기반 오늘의 한 수 ---------- */
@@ -609,7 +656,11 @@ function kstDateKey() {
 }
 
 function typeNo(p) { return parseInt(String(p.id).split('-')[1], 10) || 0; }
-function typeName(p) { return p.type === 'go' ? '바둑' : '체스'; }
+function typeName(p) {
+  if (p.type === 'go') return '바둑';
+  if (p.type === 'chess') return '체스';
+  return '장기';
+}
 
 function renderDaily() {
   const info = kstDateKey();
@@ -644,6 +695,8 @@ function applyFilter() {
   if (!list.length) { list = miniPuzzles.slice(); }
   idx = 0;
   played = null;
+  janggiSel = null;
+  janggiTargets = [];
   hintShown = false;
   renderAll();
 }
@@ -660,6 +713,8 @@ function selectGlobal(gi) {
   syncChips();
   idx = gi;
   played = null;
+  janggiSel = null;
+  janggiTargets = [];
   hintShown = false;
   renderAll();
   const card = document.getElementById('puzzleCard');
@@ -686,8 +741,8 @@ function playTone(type) {
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = type === 'ok' ? 'sine' : 'triangle';
-    osc.frequency.setValueAtTime(type === 'ok' ? 660 : 210, now);
+    osc.type = type === 'ok' ? 'sine' : (type === 'sel' ? 'sine' : 'triangle');
+    osc.frequency.setValueAtTime(type === 'ok' ? 660 : (type === 'sel' ? 520 : 210), now);
     if (type === 'ok') osc.frequency.setValueAtTime(880, now + 0.08);
     gain.gain.setValueAtTime(0.07, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
@@ -1026,6 +1081,385 @@ function chessPieceGroup(svgNS, cx, cy, symbol, side, row, col) {
   return g;
 }
 
+/* ---------- 장기 규칙 (차/포/마/상/사/궁/졸) ---------- */
+const JG_ROWS = 10;
+const JG_COLS = 9;
+const JG_PALACE = { cho: [0, 2, 3, 5], han: [7, 9, 3, 5] };
+const JG_DIAG = [
+  [[0, 3], [1, 4], [2, 5]],
+  [[0, 5], [1, 4], [2, 3]],
+  [[7, 3], [8, 4], [9, 5]],
+  [[7, 5], [8, 4], [9, 3]]
+];
+const JG_NAME = { K: '궁', R: '차', P: '포', M: '마', E: '상', G: '사', S: '졸' };
+let janggiSel = null;        // [r, c] 선택한 우리 기물
+let janggiTargets = [];      // 갈 수 있는 칸 목록
+
+function jgInside(r, c) { return r >= 0 && r < JG_ROWS && c >= 0 && c < JG_COLS; }
+function jgOther(side) { return side === 'han' ? 'cho' : 'han'; }
+function jgPalaceSide(r, c) {
+  if (r >= 0 && r <= 2 && c >= 3 && c <= 5) return 'cho';
+  if (r >= 7 && r <= 9 && c >= 3 && c <= 5) return 'han';
+  return null;
+}
+function jgInPalace(side, r, c) {
+  const p = JG_PALACE[side];
+  return r >= p[0] && r <= p[1] && c >= p[2] && c <= p[3];
+}
+function jgSign(x) { return x > 0 ? 1 : (x < 0 ? -1 : 0); }
+
+function jgDiagRays(r, c) {
+  const out = [];
+  JG_DIAG.forEach(function (seg) {
+    for (let i = 0; i < seg.length; i++) {
+      if (seg[i][0] !== r || seg[i][1] !== c) continue;
+      [-1, 1].forEach(function (step) {
+        const pts = [];
+        for (let j = i + step; j >= 0 && j < seg.length; j += step) pts.push(seg[j]);
+        if (pts.length) out.push(pts);
+      });
+    }
+  });
+  return out;
+}
+
+function jgOrthLine(r, c, dr, dc) {
+  const pts = [];
+  let tr = r + dr, tc = c + dc;
+  while (jgInside(tr, tc)) { pts.push([tr, tc]); tr += dr; tc += dc; }
+  return pts;
+}
+
+function jgPseudo(map, r, c) {
+  const piece = map.get(goKey(r, c));
+  if (!piece) return [];
+  const kind = piece.kind, side = piece.side, out = [];
+  function add(tr, tc) {
+    if (!jgInside(tr, tc)) return;
+    const t = map.get(goKey(tr, tc));
+    if (t && t.side === side) return;
+    out.push([tr, tc]);
+  }
+  if (kind === 'K' || kind === 'G') {
+    [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(function (d) {
+      const tr = r + d[0], tc = c + d[1];
+      if (jgInPalace(side, tr, tc)) add(tr, tc);
+    });
+    jgDiagRays(r, c).forEach(function (pts) {
+      const tr = pts[0][0], tc = pts[0][1];
+      if (jgInPalace(side, tr, tc)) add(tr, tc);
+    });
+  } else if (kind === 'M') {
+    [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]].forEach(function (d) {
+      const sr = Math.abs(d[0]) === 2 ? r + jgSign(d[0]) : r;
+      const sc = Math.abs(d[1]) === 2 ? c + jgSign(d[1]) : c;
+      if (!jgInside(sr, sc) || map.has(goKey(sr, sc))) return;   // 멱 막힘
+      add(r + d[0], c + d[1]);
+    });
+  } else if (kind === 'E') {
+    [[3, 2], [3, -2], [-3, 2], [-3, -2], [2, 3], [2, -3], [-2, 3], [-2, -3]].forEach(function (d) {
+      let p1, p2;
+      if (Math.abs(d[0]) === 3) {
+        p1 = [r + jgSign(d[0]), c];
+        p2 = [r + 2 * jgSign(d[0]), c + jgSign(d[1])];
+      } else {
+        p1 = [r, c + jgSign(d[1])];
+        p2 = [r + jgSign(d[0]), c + 2 * jgSign(d[1])];
+      }
+      if (!jgInside(p1[0], p1[1]) || !jgInside(p2[0], p2[1])) return;
+      if (map.has(goKey(p1[0], p1[1])) || map.has(goKey(p2[0], p2[1]))) return;  // 멱 두 곳
+      add(r + d[0], c + d[1]);
+    });
+  } else if (kind === 'R') {
+    [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(function (d) {
+      const line = jgOrthLine(r, c, d[0], d[1]);
+      for (let i = 0; i < line.length; i++) {
+        const t = map.get(goKey(line[i][0], line[i][1]));
+        if (!t) { out.push(line[i]); continue; }
+        if (t.side !== side) out.push(line[i]);
+        break;
+      }
+    });
+    jgDiagRays(r, c).forEach(function (pts) {      // 궁성 대각선
+      for (let i = 0; i < pts.length; i++) {
+        const t = map.get(goKey(pts[i][0], pts[i][1]));
+        if (!t) { out.push(pts[i]); continue; }
+        if (t.side !== side) out.push(pts[i]);
+        break;
+      }
+    });
+  } else if (kind === 'P') {
+    const lines = [];
+    [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(function (d) {
+      lines.push(jgOrthLine(r, c, d[0], d[1]));
+    });
+    jgDiagRays(r, c).forEach(function (pts) { lines.push(pts); });
+    lines.forEach(function (line) {
+      let idx = -1;
+      for (let i = 0; i < line.length; i++) {
+        if (map.has(goKey(line[i][0], line[i][1]))) { idx = i; break; }
+      }
+      if (idx < 0) return;                                  // 넘을 기물이 없으면 못 감
+      const screen = map.get(goKey(line[idx][0], line[idx][1]));
+      if (screen.kind === 'P') return;                      // 포는 포를 넘지 못함
+      if (idx + 1 >= line.length) return;
+      const sq = line[idx + 1];
+      const t = map.get(goKey(sq[0], sq[1]));
+      if (!t) out.push(sq);
+      else if (t.side !== side && t.kind !== 'P') out.push(sq);   // 포는 포를 잡지 못함
+    });
+  } else if (kind === 'S') {
+    const fwd = side === 'han' ? -1 : 1;
+    [[fwd, 0], [0, -1], [0, 1]].forEach(function (d) { add(r + d[0], c + d[1]); });
+    const enemyPalace = jgOther(side);
+    jgDiagRays(r, c).forEach(function (pts) {
+      const sq = pts[0];
+      if (jgPalaceSide(sq[0], sq[1]) !== enemyPalace) return;
+      if (sq[0] - r !== fwd) return;                        // 적 궁성에서 앞으로 나가는 대각선만
+      add(sq[0], sq[1]);
+    });
+  }
+  return out;
+}
+
+function jgFindKing(map, side) {
+  let out = null;
+  map.forEach(function (p, k) {
+    if (!out && p.side === side && p.kind === 'K') {
+      const parts = k.split(',');
+      out = [parseInt(parts[0], 10), parseInt(parts[1], 10)];
+    }
+  });
+  return out;
+}
+
+function jgKingsFace(map) {
+  const hk = jgFindKing(map, 'han'), ck = jgFindKing(map, 'cho');
+  if (!hk || !ck || hk[1] !== ck[1]) return false;
+  const lo = Math.min(hk[0], ck[0]), hi = Math.max(hk[0], ck[0]);
+  for (let r = lo + 1; r < hi; r++) {
+    if (map.has(goKey(r, hk[1]))) return false;
+  }
+  return true;
+}
+
+function jgAttacked(map, sq, bySide) {
+  if (!sq) return false;
+  let hit = false;
+  map.forEach(function (p, k) {
+    if (hit || p.side !== bySide) return;
+    const parts = k.split(',');
+    const r = parseInt(parts[0], 10), c = parseInt(parts[1], 10);
+    const mv = jgPseudo(map, r, c);
+    for (let i = 0; i < mv.length; i++) {
+      if (mv[i][0] === sq[0] && mv[i][1] === sq[1]) { hit = true; return; }
+    }
+  });
+  return hit;
+}
+
+function jgApply(map, from, to) {
+  const next = new Map(map);
+  const piece = next.get(goKey(from[0], from[1]));
+  const captured = next.get(goKey(to[0], to[1])) || null;
+  next.delete(goKey(from[0], from[1]));
+  next.set(goKey(to[0], to[1]), piece);
+  return { board: next, captured: captured };
+}
+
+function jgLegalMovesFrom(map, from, side) {
+  const out = [];
+  jgPseudo(map, from[0], from[1]).forEach(function (dst) {
+    const res = jgApply(map, from, dst);
+    if (jgKingsFace(res.board)) return;
+    const kp = jgFindKing(res.board, side);
+    if (!kp) return;
+    if (jgAttacked(res.board, kp, jgOther(side))) return;
+    out.push(dst);
+  });
+  return out;
+}
+
+function janggiBaseMap(p) {
+  const map = new Map();
+  p.pieces.forEach(function (x) {
+    map.set(goKey(x.r, x.c), { kind: x.kind, side: x.side, symbol: x.symbol });
+  });
+  return map;
+}
+
+function janggiLiveMap(p) {
+  if (played && played.board) return played.board;
+  return janggiBaseMap(p);
+}
+
+/* ---------- 보드 렌더 (장기) ---------- */
+function renderJanggiBoard(p) {
+  const rows = p.rows || JG_ROWS, cols = p.cols || JG_COLS;
+  const pad = 18, cell = 34;
+  const vbW = pad * 2 + cell * (cols - 1);
+  const vbH = pad * 2 + cell * (rows - 1);
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 ' + vbW + ' ' + vbH);
+  svg.setAttribute('class', 'board-svg');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', '9x10 장기판');
+
+  const bg = document.createElementNS(svgNS, 'rect');
+  bg.setAttribute('width', vbW); bg.setAttribute('height', vbH);
+  bg.setAttribute('rx', '10'); bg.setAttribute('fill', '#e6c894');
+  svg.appendChild(bg);
+
+  function lineEl(x1, y1, x2, y2, width) {
+    const l = document.createElementNS(svgNS, 'line');
+    l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+    l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+    l.setAttribute('stroke', '#5b4520'); l.setAttribute('stroke-width', width || '1.1');
+    return l;
+  }
+  for (let r = 0; r < rows; r++) {
+    svg.appendChild(lineEl(pad, pad + r * cell, vbW - pad, pad + r * cell));
+  }
+  for (let c = 0; c < cols; c++) {
+    svg.appendChild(lineEl(pad + c * cell, pad, pad + c * cell, vbH - pad));
+  }
+  // 궁성 대각선
+  JG_DIAG.forEach(function (seg) {
+    const a = seg[0], b = seg[2];
+    svg.appendChild(lineEl(pad + a[1] * cell, pad + a[0] * cell, pad + b[1] * cell, pad + b[0] * cell, '1.1'));
+  });
+
+  // 좌표 라벨 (행 1~10 왼쪽, 열 1~9 아래)
+  for (let r = 0; r < rows; r++) {
+    const rl = document.createElementNS(svgNS, 'text');
+    rl.setAttribute('x', pad - 10);
+    rl.setAttribute('y', pad + r * cell + 3.5);
+    rl.setAttribute('text-anchor', 'middle');
+    rl.setAttribute('font-size', '9');
+    rl.setAttribute('fill', '#7c6229');
+    rl.setAttribute('pointer-events', 'none');
+    rl.textContent = String(r + 1);
+    svg.appendChild(rl);
+  }
+  for (let c = 0; c < cols; c++) {
+    const cl = document.createElementNS(svgNS, 'text');
+    cl.setAttribute('x', pad + c * cell);
+    cl.setAttribute('y', vbH - pad + 12);
+    cl.setAttribute('text-anchor', 'middle');
+    cl.setAttribute('font-size', '9');
+    cl.setAttribute('fill', '#7c6229');
+    cl.setAttribute('pointer-events', 'none');
+    cl.textContent = String(c + 1);
+    svg.appendChild(cl);
+  }
+
+  const map = janggiLiveMap(p);
+
+  // 탭 영역 (교차점 전체)
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const hit = document.createElementNS(svgNS, 'rect');
+      hit.setAttribute('x', pad + c * cell - cell / 2);
+      hit.setAttribute('y', pad + r * cell - cell / 2);
+      hit.setAttribute('width', cell);
+      hit.setAttribute('height', cell);
+      hit.setAttribute('fill', 'transparent');
+      hit.setAttribute('class', 'jg-hit');
+      hit.setAttribute('data-row', String(r));
+      hit.setAttribute('data-col', String(c));
+      hit.addEventListener('click', (function (rr, cc) {
+        return function () { handleMove(rr, cc); };
+      })(r, c));
+      svg.appendChild(hit);
+    }
+  }
+
+  // 갈 수 있는 칸 표시
+  janggiTargets.forEach(function (t) {
+    const occ = map.get(goKey(t[0], t[1]));
+    const m = document.createElementNS(svgNS, 'circle');
+    m.setAttribute('cx', pad + t[1] * cell);
+    m.setAttribute('cy', pad + t[0] * cell);
+    m.setAttribute('r', occ ? '14' : '5');
+    if (occ) {
+      m.setAttribute('fill', 'none');
+      m.setAttribute('stroke', '#0ea5e9');
+      m.setAttribute('stroke-width', '2.6');
+    } else {
+      m.setAttribute('fill', 'rgba(14, 165, 233, 0.55)');
+    }
+    m.setAttribute('pointer-events', 'none');
+    svg.appendChild(m);
+  });
+
+  // 기물
+  map.forEach(function (x, k) {
+    const parts = k.split(',');
+    const r = parseInt(parts[0], 10), c = parseInt(parts[1], 10);
+    const cx = pad + c * cell, cy = pad + r * cell;
+    const color = x.side === 'han' ? '#b91c1c' : '#0f766e';
+    const disk = document.createElementNS(svgNS, 'circle');
+    disk.setAttribute('cx', cx); disk.setAttribute('cy', cy);
+    disk.setAttribute('r', '14.4');
+    disk.setAttribute('fill', x.side === 'han' ? '#fdf3df' : '#eef7f3');
+    disk.setAttribute('stroke', color);
+    disk.setAttribute('stroke-width', x.mover ? '2' : '1.3');
+    disk.setAttribute('pointer-events', 'none');
+    svg.appendChild(disk);
+    const tx = document.createElementNS(svgNS, 'text');
+    tx.setAttribute('x', cx); tx.setAttribute('y', cy + 5.4);
+    tx.setAttribute('text-anchor', 'middle');
+    tx.setAttribute('font-size', '15');
+    tx.setAttribute('font-weight', '700');
+    tx.setAttribute('fill', color);
+    tx.setAttribute('pointer-events', 'none');
+    tx.setAttribute('class', 'jg-piece');
+    tx.textContent = x.symbol;
+    svg.appendChild(tx);
+  });
+
+  // 선택 표시
+  if (janggiSel) {
+    const s = document.createElementNS(svgNS, 'circle');
+    s.setAttribute('cx', pad + janggiSel[1] * cell);
+    s.setAttribute('cy', pad + janggiSel[0] * cell);
+    s.setAttribute('r', '16');
+    s.setAttribute('fill', 'none');
+    s.setAttribute('stroke', '#0ea5e9');
+    s.setAttribute('stroke-width', '2.4');
+    s.setAttribute('pointer-events', 'none');
+    svg.appendChild(s);
+  }
+
+  // 마지막 수 표시
+  if (played && played.board) {
+    const col = played.isCorrect ? '#22c55e' : '#ef4444';
+    const mk = document.createElementNS(svgNS, 'circle');
+    mk.setAttribute('cx', pad + played.c * cell);
+    mk.setAttribute('cy', pad + played.r * cell);
+    mk.setAttribute('r', '16');
+    mk.setAttribute('fill', 'none');
+    mk.setAttribute('stroke', col);
+    mk.setAttribute('stroke-width', '2.6');
+    mk.setAttribute('pointer-events', 'none');
+    svg.appendChild(mk);
+    if (played.from) {
+      const fr = document.createElementNS(svgNS, 'circle');
+      fr.setAttribute('cx', pad + played.from[1] * cell);
+      fr.setAttribute('cy', pad + played.from[0] * cell);
+      fr.setAttribute('r', '16');
+      fr.setAttribute('fill', 'none');
+      fr.setAttribute('stroke', col);
+      fr.setAttribute('stroke-width', '1.2');
+      fr.setAttribute('stroke-dasharray', '3 3');
+      fr.setAttribute('pointer-events', 'none');
+      svg.appendChild(fr);
+    }
+  }
+  return svg;
+}
+
 /* ---------- 카드/탭 ---------- */
 function renderTabs() {
   const wrap = document.getElementById('puzzleTabs');
@@ -1056,9 +1490,13 @@ function renderTabs() {
 function renderBoardOnly() {
   const p = current();
   const wrap = document.getElementById('boardWrap');
+  const legend = document.getElementById('janggiLegend');
   if (!wrap || !p) return;
+  if (legend) legend.hidden = p.type !== 'janggi';
   wrap.innerHTML = '';
-  wrap.appendChild(p.type === 'go' ? renderGoBoard(p) : renderChessBoard(p));
+  if (p.type === 'go') wrap.appendChild(renderGoBoard(p));
+  else if (p.type === 'chess') wrap.appendChild(renderChessBoard(p));
+  else wrap.appendChild(renderJanggiBoard(p));
 }
 
 function renderFeedback(p, isCorrect) {
@@ -1125,6 +1563,7 @@ function renderAll() {
 function handleMove(r, c) {
   const p = current();
   if (!p || played) return;
+  if (p.type === 'janggi') { handleJanggiTap(p, r, c); return; }
   const isCorrect = (r === p.answer.r && c === p.answer.c);
 
   if (p.type === 'go') {
@@ -1154,15 +1593,87 @@ function handleMove(r, c) {
   }
 }
 
+/* ---------- 장기 조작: 기물 선택 → 도착칸 탭 ---------- */
+function handleJanggiTap(p, r, c) {
+  const map = janggiLiveMap(p);
+  const piece = map.get(goKey(r, c));
+
+  if (janggiSel) {
+    let isTarget = false;
+    for (let i = 0; i < janggiTargets.length; i++) {
+      if (janggiTargets[i][0] === r && janggiTargets[i][1] === c) { isTarget = true; break; }
+    }
+    if (isTarget) {
+      playJanggiMove(p, janggiSel, [r, c]);
+      return;
+    }
+    if (piece && piece.side === 'han') {
+      selectJanggiPiece(p, r, c);
+      return;
+    }
+    janggiSel = null;
+    janggiTargets = [];
+    renderBoardOnly();
+    showToast('그 기물로는 그 칸에 갈 수 없어요.');
+    return;
+  }
+  if (piece && piece.side === 'han') {
+    selectJanggiPiece(p, r, c);
+    return;
+  }
+  showToast('움직일 우리 기물(한 · 빨강)을 먼저 탭하세요.');
+}
+
+function selectJanggiPiece(p, r, c) {
+  const map = janggiLiveMap(p);
+  janggiTargets = jgLegalMovesFrom(map, [r, c], 'han');
+  if (!janggiTargets.length) {
+    janggiSel = null;
+    janggiTargets = [];
+    renderBoardOnly();
+    showToast('이 기물은 지금 움직일 수 있는 칸이 없어요.');
+    return;
+  }
+  janggiSel = [r, c];
+  playTone('sel');
+  renderBoardOnly();
+}
+
+function playJanggiMove(p, from, to) {
+  const map = janggiBaseMap(p);
+  const res = jgApply(map, from, to);
+  const ans = p.answer;
+  const isCorrect = (from[0] === ans.from.r && from[1] === ans.from.c &&
+                     to[0] === ans.to.r && to[1] === ans.to.c);
+  played = { r: to[0], c: to[1], from: from, isCorrect: isCorrect, board: res.board };
+  janggiSel = null;
+  janggiTargets = [];
+  playTone(isCorrect ? 'ok' : 'ng');
+  if (res.captured) {
+    showToast((res.captured.side === 'cho' ? '초 ' : '한 ') + (JG_NAME[res.captured.kind] || '기물') + '을 잡았습니다!');
+  }
+  renderBoardOnly();
+  renderFeedback(p, isCorrect);
+  if (isCorrect) {
+    markSolved(p.id);
+    if (miniPuzzles.indexOf(p) === dailyIdx) markDailyDone(p);
+    renderTabs();
+  }
+}
+
 function selectIndex(i) {
   idx = i;
   played = null;
+  janggiSel = null;
+  janggiTargets = [];
   hintShown = false;
   renderPuzzle();
 }
 
 function retryPuzzle() {
   played = null;
+  janggiSel = null;
+  janggiTargets = [];
   hintShown = false;
   renderPuzzle();
 }
@@ -1170,6 +1681,8 @@ function retryPuzzle() {
 function nextPuzzle() {
   idx = (idx + 1) % list.length;
   played = null;
+  janggiSel = null;
+  janggiTargets = [];
   hintShown = false;
   renderPuzzle();
   const card = document.getElementById('puzzleCard');
@@ -1283,13 +1796,13 @@ function resultSharePayload() {
   const p = current();
   const n = Math.min(solvedIds().length, miniPuzzles.length);
   const url = puzzleLink(p);
-  let text = '바둑·체스 한 수 미니';
+  let text = '바둑·체스·장기 한 수 미니';
   if (p) {
     const state = played ? (played.isCorrect ? '정답' : '오답') : '도전 중';
     text += '\n' + p.title + ' · ' + state;
   }
-  text += '\n푼 문제 ' + n + '/20';
-  return { title: '바둑·체스 한 수 미니', text: text, url: url };
+  text += '\n푼 문제 ' + n + '/' + miniPuzzles.length;
+  return { title: '바둑·체스·장기 한 수 미니', text: text, url: url };
 }
 
 function legacyCopy(value) {
