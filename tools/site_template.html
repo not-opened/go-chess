@@ -1199,25 +1199,29 @@ function jgPseudo(map, r, c) {
       for (let i = 0; i < line.length; i++) {
         if (map.has(goKey(line[i][0], line[i][1]))) { idx = i; break; }
       }
-      if (idx < 0) return;                                  // 넘을 기물이 없으면 못 감
+      if (idx < 0) return;
       const screen = map.get(goKey(line[idx][0], line[idx][1]));
-      if (screen.kind === 'P') return;                      // 포는 포를 넘지 못함
-      if (idx + 1 >= line.length) return;
-      const sq = line[idx + 1];
-      const t = map.get(goKey(sq[0], sq[1]));
-      if (!t) out.push(sq);
-      else if (t.side !== side && t.kind !== 'P') out.push(sq);   // 포는 포를 잡지 못함
+      if (screen.kind === 'P') return;
+      for (let j = idx + 1; j < line.length; j++) {
+        const sq = line[j];
+        const t = map.get(goKey(sq[0], sq[1]));
+        if (!t) { out.push(sq); continue; }
+        if (t.side !== side && t.kind !== 'P') out.push(sq);
+        break;
+      }
     });
   } else if (kind === 'S') {
     const fwd = side === 'han' ? -1 : 1;
     [[fwd, 0], [0, -1], [0, 1]].forEach(function (d) { add(r + d[0], c + d[1]); });
-    const enemyPalace = jgOther(side);
-    jgDiagRays(r, c).forEach(function (pts) {
-      const sq = pts[0];
-      if (jgPalaceSide(sq[0], sq[1]) !== enemyPalace) return;
-      if (sq[0] - r !== fwd) return;                        // 적 궁성에서 앞으로 나가는 대각선만
-      add(sq[0], sq[1]);
-    });
+    const here = jgPalaceSide(r, c);
+    if (here) {
+      jgDiagRays(r, c).forEach(function (pts) {
+        const sq = pts[0];
+        if (jgPalaceSide(sq[0], sq[1]) !== here) return;
+        if (sq[0] - r !== fwd) return;
+        add(sq[0], sq[1]);
+      });
+    }
   }
   return out;
 }

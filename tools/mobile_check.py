@@ -106,6 +106,11 @@ def run(url, shot_prefix, out_json, vw, vh):
 
         # ---------- 장기 보드 ----------
         check("장기판 히트칸 90", page.locator("#boardWrap rect.jg-hit").count() == 90, page.locator("#boardWrap rect.jg-hit").count())
+        hit375 = page.evaluate("""() => {
+          const h = document.querySelector('#boardWrap rect.jg-hit');
+          return h ? Math.round(h.getBoundingClientRect().width) : 0;
+        }""")
+        check("375 장기 터치 영역", hit375 >= 30, hit375)
         check("장기 범례 표시", not page.locator("#janggiLegend").is_hidden())
         check("장기 타입 표기", "장기" in page.locator("#puzzleTypePill").inner_text(), page.locator("#puzzleTypePill").inner_text())
         check("장기 정답 문구", "행" in page.evaluate("() => window.miniPuzzles.find(p => p.type==='janggi').answerText"))
@@ -313,6 +318,11 @@ def run(url, shot_prefix, out_json, vw, vh):
         ov320 = page.evaluate("() => ({sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth})")
         check("320 가로 넘침 없음", ov320["sw"] <= ov320["cw"] + 1, ov320)
         check("320 장기판 히트칸 90", page.locator("#boardWrap rect.jg-hit").count() == 90)
+        hit320 = page.evaluate("""() => {
+          const h = document.querySelector('#boardWrap rect.jg-hit');
+          return h ? Math.round(h.getBoundingClientRect().width) : 0;
+        }""")
+        check("320 장기 터치 영역", hit320 >= 28, hit320)
 
         base = url if url.endswith("/") else url + "/"
         page.set_viewport_size({"width": vw, "height": vh})
