@@ -10,7 +10,7 @@
 
 규칙(대한장기협회·한국 장기 정식 규칙 요약)
   · 차/포: 직선(가로·세로) 임의 거리. 궁성 대각선(모서리–중앙–반대 모서리)도 같은 방식으로 이동.
-  · 포: 정확히 기물 하나를 넘어야 하고, 넘는 기물도 잡는 기물도 포일 수 없다.
+  · 포: 포가 아닌 기물을 정확히 하나 넘고, 그 뒤의 빈 칸은 얼마든지 간다. 넘는 기물도 잡는 기물도 포일 수 없다.
   · 마: 직선 한 칸 + 대각 한 칸. 직선 첫 칸(멱)이 비어 있어야 한다.
   · 상: 직선 한 칸 + 대각 두 칸. 직선 첫 칸과 대각 첫 칸(멱 두 곳)이 비어 있어야 한다.
   · 사/궁: 궁성 안에서 직선 한 칸 또는 궁성 대각선 한 칸. 궁성 밖으로 나갈 수 없다.
@@ -170,38 +170,42 @@ def pseudo_moves(board, r, c):
                     break
 
     elif kind == "P":
+        # 포는 사이에 포가 아닌 기물이 정확히 하나 있어야 하고, 그 뒤의 빈 칸은
+        # 얼마든지 갈 수 있다. 그 다음 기물을 잡을 때는 그 기물이 포이면 안 된다.
         lines = [orth_line(r, c, dr, dc) for dr, dc in ORTH] + diag_rays(r, c)
         for line in lines:
-            idx = None
+            screen_i = None
             for i, pt in enumerate(line):
                 if pt in board:
-                    idx = i
+                    screen_i = i
                     break
-            if idx is None:
-                continue                     # 넘을 기물이 없으면 이동 불가
-            if board[line[idx]][0] == "P":
-                continue                     # 포는 포를 넘을 수 없다
-            if idx + 1 >= len(line):
+            if screen_i is None:
                 continue
-            tr, tc = line[idx + 1]
-            t = board.get((tr, tc))
-            if t is None:
-                out.append((tr, tc))
-            elif t[1] != side and t[0] != "P":   # 포는 포를 잡을 수 없다
-                out.append((tr, tc))
+            if board[line[screen_i]][0] == "P":
+                continue
+            for j in range(screen_i + 1, len(line)):
+                tr, tc = line[j]
+                t = board.get((tr, tc))
+                if t is None:
+                    out.append((tr, tc))
+                    continue
+                if t[1] != side and t[0] != "P":
+                    out.append((tr, tc))
+                break
 
     elif kind == "S":
         fwd = -1 if side == HAN else 1
         for dr, dc in [(fwd, 0), (0, -1), (0, 1)]:
             add(r + dr, c + dc)
-        enemy_palace = CHO if side == HAN else HAN
-        for pts in diag_rays(r, c):
-            tr, tc = pts[0]
-            if palace_side(tr, tc) != enemy_palace:
-                continue
-            if tr - r != fwd:                # 적 궁성에서도 앞으로 나가는 대각선만
-                continue
-            add(tr, tc)
+        here = palace_side(r, c)
+        if here is not None:
+            for pts in diag_rays(r, c):
+                tr, tc = pts[0]
+                if palace_side(tr, tc) != here:
+                    continue
+                if tr - r != fwd:
+                    continue
+                add(tr, tc)
 
     else:
         raise ValueError("unknown kind " + str(kind))
@@ -328,6 +332,15 @@ def position_problems(board):
         problems.append("초가 이미 장군")
     if not legal_moves(board, CHO):
         problems.append("초의 합법수 없음(이미 외통)")
+    limits = {"K": 1, "G": 2, "R": 2, "P": 2, "M": 2, "E": 2, "S": 5}
+    counts = {}
+    for (k, s) in board.values():
+        counts[(s, k)] = counts.get((s, k), 0) + 1
+    for side in (HAN, CHO):
+        for kind, limit in limits.items():
+            n = counts.get((side, kind), 0)
+            if n > limit:
+                problems.append("%s %s %d개 (최대 %d)" % (side, kind, n, limit))
     return problems
 
 

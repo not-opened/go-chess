@@ -78,7 +78,18 @@ def run(url, shot_prefix, out_json, vw, vh):
             rel = banner.get_attribute("rel") or ""
             check("rel=noopener noreferrer", "noopener" in rel and "noreferrer" in rel, rel)
             box = banner.bounding_box()
-            check("배너 높이 44~52px", box and 44 <= round(box["height"]) <= 52, box and round(box["height"]))
+            check("배너 높이 44px 이상", box and box["height"] >= 44, box and round(box["height"]))
+            fit = page.evaluate("""() => {
+              const b = document.querySelector('.yt-banner');
+              const t = b.querySelector('.yt-text');
+              const br = b.getBoundingClientRect();
+              const tr = t.getBoundingClientRect();
+              return {
+                inside: tr.top >= br.top - 1 && tr.bottom <= br.bottom + 1,
+                text: t.textContent
+              };
+            }""")
+            check("유튜브 배너 문구가 잘리지 않음", fit["inside"] and "보러가기" in fit["text"], fit)
             hbox = page.locator(".portal-header").bounding_box()
             check("배너가 헤더보다 위", box and hbox and box["y"] < hbox["y"], (box and round(box["y"]), hbox and round(hbox["y"])))
             check("배너 문구", "유튜브" in banner.inner_text(), banner.inner_text())
@@ -106,6 +117,11 @@ def run(url, shot_prefix, out_json, vw, vh):
 
         # ---------- 장기 보드 ----------
         check("장기판 히트칸 90", page.locator("#boardWrap rect.jg-hit").count() == 90, page.locator("#boardWrap rect.jg-hit").count())
+        hit375 = page.evaluate("""() => {
+          const h = document.querySelector('#boardWrap rect.jg-hit');
+          return h ? Math.round(h.getBoundingClientRect().width) : 0;
+        }""")
+        check("375 장기 터치 영역", hit375 >= 30, hit375)
         check("장기 범례 표시", not page.locator("#janggiLegend").is_hidden())
         check("장기 타입 표기", "장기" in page.locator("#puzzleTypePill").inner_text(), page.locator("#puzzleTypePill").inner_text())
         check("장기 정답 문구", "행" in page.evaluate("() => window.miniPuzzles.find(p => p.type==='janggi').answerText"))
@@ -312,7 +328,20 @@ def run(url, shot_prefix, out_json, vw, vh):
         page.wait_for_timeout(200)
         ov320 = page.evaluate("() => ({sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth})")
         check("320 가로 넘침 없음", ov320["sw"] <= ov320["cw"] + 1, ov320)
+        yt320 = page.evaluate("""() => {
+          const b = document.querySelector('.yt-banner');
+          const t = b.querySelector('.yt-text');
+          const br = b.getBoundingClientRect();
+          const tr = t.getBoundingClientRect();
+          return {h: Math.round(br.height), inside: tr.top >= br.top - 1 && tr.bottom <= br.bottom + 1, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth};
+        }""")
+        check("320 유튜브 배너 문구가 잘리지 않음", yt320["inside"] and yt320["h"] >= 44 and yt320["sw"] <= yt320["cw"] + 1, yt320)
         check("320 장기판 히트칸 90", page.locator("#boardWrap rect.jg-hit").count() == 90)
+        hit320 = page.evaluate("""() => {
+          const h = document.querySelector('#boardWrap rect.jg-hit');
+          return h ? Math.round(h.getBoundingClientRect().width) : 0;
+        }""")
+        check("320 장기 터치 영역", hit320 >= 28, hit320)
 
         base = url if url.endswith("/") else url + "/"
         page.set_viewport_size({"width": vw, "height": vh})
