@@ -131,7 +131,7 @@ function renderSteps(){
     for(let j=0;j<5;j++){
       const i=m*5+j,b=document.createElement('button');
       b.type='button';b.dataset.index=i;
-      b.addEventListener('click',()=>open(i,true));grid.append(b);
+      b.addEventListener('click',()=>{ review.leave(false); open(i,true); });grid.append(b);
     }
     section.append(title,grid);nav.append(section);
   });
@@ -148,9 +148,10 @@ function renderSteps(){
 function open(i,focus=false){
   index=i;done=selected=result=false;miss=-1;
   const p=current(), mode=modes[modeOf(index)];
+  review.resetNotes();
   $('lesson').hidden=false;$('finish').hidden=true;
   text('title',(index%5+1)+'수. '+p.title);
-  text('kicker',mode+' 연습 · '+(go?'흑':'백')+' 차례');
+  text('kicker',(review.active?'오답 · ':'')+mode+' 연습 · '+(go?'흑':'백')+' 차례');
   text('prompt',p.prompt);
   text('hint-text',p.hint);
   $('hint-text').hidden=$('next').hidden=$('retry').hidden=true;
@@ -175,17 +176,19 @@ function choose(i){
   const p=current();
   if(i!==p.answer){
     miss=i;
+    review.record(index,i);
     feedback('다시 골라 보세요.',p.options[i][2],'wrong');
     renderBoard('option-'+i);
     $('response').scrollIntoView({block:'nearest'});
     return;
   }
   done=true;solved.add(index);
+  review.complete(index);
   renderBoard();renderSteps();
   feedback('맞았어요!',p.rule,'ok');
   $('hint').hidden=$('hint-text').hidden=true;
   $('next').hidden=$('retry').hidden=false;
-  text('next',groupSolved(modeOf(index))===5?'코스 결과 보기 →':'다음 수 →');
+  text('next',review.active?review.nextLabel():groupSolved(modeOf(index))===5?'코스 결과 보기 →':'다음 수 →');
   $('next').focus({preventScroll:true});
   $('next').scrollIntoView({block:'nearest'});
 }
@@ -210,6 +213,7 @@ $('hint').addEventListener('click',()=>{
   $('hint').setAttribute('aria-expanded',String(show));
 });
 $('next').addEventListener('click',()=>{
+  if(review.next())return;
   const m=modeOf(index);
   if(groupSolved(m)===5){finish();return;}
   const start=startOf(m);
@@ -225,4 +229,5 @@ $('again').addEventListener('click',()=>{
   for(let i=start;i<start+5;i++)solved.delete(i);
   open(start,true);
 });
+const review=createMistakeReview({course:topic,lessons,getIndex:()=>index,open});
 open(new URLSearchParams(location.search).get('mode')==='defense'?5:0);

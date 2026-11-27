@@ -608,7 +608,17 @@ body {
   max-width: 90vw;
 }
 .toast.show { opacity: 1; }
-  </style>
+  .hub-mistakes { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem .75rem; margin: 0 0 .75rem; padding: .55rem .65rem; border: 1px solid var(--border); border-radius: 10px; }
+.hub-mistakes[hidden] { display: none; }
+.hub-mistakes button { min-height: 44px; }
+.hub-mistakes button:disabled { opacity: .65; cursor: default; }
+.hub-mistakes p { flex: 1 1 11rem; margin: 0; font-size: .8rem; }
+#hubWrongNotes { font-size: .86rem; margin: .5rem 0; }
+#hubWrongNotes summary { cursor: pointer; padding: .35rem 0; }
+#hubWrongList { margin: .25rem 0; padding-left: 1.2rem; }
+#hubWrongList li + li { margin-top: .3rem; }
+
+</style>
 </head>
 <body>
   <main class="container">
@@ -689,6 +699,12 @@ body {
 
     <p class="progress-line">푼 문제 <b id="solvedCount">0</b> / <span id="totalCount">45</span></p>
 
+    <section class="hub-mistakes" aria-label="오답 다시 풀기" id="hubMistakes" hidden>
+      <button type="button" class="btn-secondary" id="hubWrongStart">오답 다시 풀기</button>
+      <button type="button" class="btn-secondary" id="hubWrongExit" hidden>일반 문제로 돌아가기</button>
+      <p id="hubWrongStatus" role="status" tabindex="-1"></p>
+    </section>
+
     <div class="puzzle-tabs" id="puzzleTabs" role="tablist" aria-label="문제 선택"></div>
 
     <section class="card" id="puzzleCard" aria-live="polite">
@@ -716,6 +732,10 @@ body {
         <p id="feedbackText"></p>
         <div class="feedback-answer" id="feedbackAnswer"></div>
         <div class="feedback-source" id="feedbackSource"></div>
+        <details id="hubWrongNotes" hidden>
+          <summary>내가 틀린 수 살펴보기</summary>
+          <ul id="hubWrongList"></ul>
+        </details>
         <div class="feedback-actions" id="feedbackActions" hidden>
           <button type="button" class="fb-primary" id="fbRetryBtn">🔄 바로 다시</button>
           <button type="button" id="fbHintBtn">💡 힌트 보기</button>
@@ -787,6 +807,7 @@ body {
   }});
   </script>
 
+  <script src="./hub-retry.js"></script>
   <script>
 const miniPuzzles = __PUZZLES_JSON__;
 window.miniPuzzles = miniPuzzles;
@@ -805,6 +826,7 @@ let hintShown = false;
 let soundEnabled = true;
 let audioCtx = null;
 let dailyIdx = 0;
+let hubReview = null, hubPrevious = null;
 
 function safeGet(key, fallback) {
   try {
@@ -893,6 +915,7 @@ function current() { return list[((idx % list.length) + list.length) % list.leng
 function globalIndex(p) { return miniPuzzles.indexOf(p); }
 
 function selectGlobal(gi) {
+  if (hubReview?.active) { hubReview.leave(false); hubPrevious = null; }
   const p = miniPuzzles[gi];
   if (!p) return;
   typeFilter = 'all';
@@ -1851,6 +1874,7 @@ function wrongNoteFor(p, mv) {
 function renderFeedback(p, isCorrect, note) {
   const reveal = isCorrect || wrongTries >= 2;
   if (isCorrect) {
+    hubReview?.complete(p);
     setFeedbackBox({
       ok: true,
       status: '✅ 정답입니다! 완벽한 한 수예요.',
@@ -1911,6 +1935,7 @@ function renderPuzzle() {
   if (title) title.textContent = p.title;
   if (prompt) prompt.textContent = p.prompt;
   if (fb) fb.className = 'feedback-box';
+  hubReview?.resetNotes();
   if (hintBox) {
     hintBox.hidden = !hintShown;
     hintBox.textContent = hintShown ? ('힌트: ' + p.hint) : '';
@@ -1958,7 +1983,9 @@ function handleMove(r, c) {
   if (!isCorrect) wrongTries += 1;
   playTone(isCorrect ? 'ok' : 'ng');
   renderBoardOnly();
-  renderFeedback(p, isCorrect, isCorrect ? '' : wrongNoteFor(p, played));
+  const note = isCorrect ? '' : wrongNoteFor(p, played);
+  if (!isCorrect) hubReview?.record(p, played, note);
+  renderFeedback(p, isCorrect, note);
   if (isCorrect) {
     markSolved(p.id);
     if (miniPuzzles.indexOf(p) === dailyIdx) markDailyDone(p);
@@ -2028,7 +2055,9 @@ function playJanggiMove(p, from, to) {
   }
   if (!isCorrect) wrongTries += 1;
   renderBoardOnly();
-  renderFeedback(p, isCorrect, isCorrect ? '' : wrongNoteFor(p, played));
+  const note = isCorrect ? '' : wrongNoteFor(p, played);
+  if (!isCorrect) hubReview?.record(p, played, note);
+  renderFeedback(p, isCorrect, note);
   if (isCorrect) {
     markSolved(p.id);
     if (miniPuzzles.indexOf(p) === dailyIdx) markDailyDone(p);
@@ -2056,6 +2085,17 @@ function retryPuzzle() {
 }
 
 function nextPuzzle() {
+  if (hubReview?.active) {
+    const before = current();
+    const order = list.slice(idx + 1).concat(list.slice(0, idx + 1));
+    const saved = hubReview.pending();
+    if (!saved.length) { hubReview.leave(true, true); return; }
+    list = saved;
+    const following = order.find(p => p !== before && list.includes(p));
+    selectIndex(Math.max(0, list.indexOf(following || before)));
+    document.getElementById('puzzleCard').scrollIntoView({block:'start'});
+    return;
+  }
   idx = (idx + 1) % list.length;
   played = null;
   wrongTries = 0;
@@ -2084,9 +2124,34 @@ function toggleHint() {
   }
 }
 
+function startHubReview() {
+  hubPrevious = { typeFilter, diffFilter, puzzle: current() };
+  list = hubReview.pending();
+  if (!list.length) { hubReview.leave(); return; }
+  selectIndex(0);
+  document.getElementById('puzzleCard').scrollIntoView({block:'start'});
+}
+
+function endHubReview() {
+  if (!hubPrevious) return;
+  const previous = hubPrevious;
+  hubPrevious = null;
+  typeFilter = previous.typeFilter;
+  diffFilter = previous.diffFilter;
+  syncChips();
+  applyFilter();
+  const old = list.indexOf(previous.puzzle);
+  if (old >= 0) selectIndex(old);
+}
+
 function init() {
+  if (typeof createHubReview === 'function') {
+    hubReview = createHubReview({ puzzles:miniPuzzles, startReview:startHubReview, endReview:endHubReview });
+    document.getElementById('hubMistakes').hidden = false;
+  }
   document.querySelectorAll('#typeFilters .filter-chip').forEach(function (btn) {
     btn.addEventListener('click', function () {
+      if (hubReview?.active) hubReview.leave();
       typeFilter = btn.getAttribute('data-type');
       syncChips();
       applyFilter();
@@ -2094,6 +2159,7 @@ function init() {
   });
   document.querySelectorAll('#diffFilters .filter-chip').forEach(function (btn) {
     btn.addEventListener('click', function () {
+      if (hubReview?.active) hubReview.leave();
       diffFilter = btn.getAttribute('data-diff');
       syncChips();
       applyFilter();
