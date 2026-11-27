@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>체스 공격·수비 10수 | notopened</title>
+<meta name="description" content="상대 킹과 기물을 노리는 공격 5수, 체크를 풀어 내는 수비 5수를 직접 둬 보세요.">
+<link rel="canonical" href="https://notopened.com/go-chess/chess-practice/">
+<meta name="theme-color" content="#f2efe6">
+<link rel="stylesheet" href="../janggi-beginner/course.css?v=2">
+<link rel="stylesheet" href="../tactics-course.css">
+<script defer src="lessons.js"></script>
+<script defer src="../tactics-course.js"></script>
+</head>
+<body data-topic="chess">
+<main>
+<a class="back" href="../">← 기존 한 수 퍼즐</a>
+<header class="intro">
+  <p class="eyebrow">NOTOPENED · 체스 연습장</p>
+  <h1>체스 공격·수비 10수</h1>
+  <p>상대 킹과 기물을 노리는 공격 5수, 체크를 풀어 내는 수비 5수를 직접 둬 보세요.</p>
+</header>
+<nav id="steps" aria-label="공격·수비 문제 고르기"></nav>
+<section class="lesson" id="lesson" aria-labelledby="title">
+  <p id="kicker" class="eyebrow"></p>
+  <h2 id="title" tabindex="-1"></h2>
+  <p id="prompt">백 차례 · 움직일 말을 누른 뒤 A, B, C 중 한곳을 고르세요.</p>
+  <div class="playing">
+    <div>
+      <div id="board" class="tactics-board" role="group" aria-label="체스 연습판"></div>
+      <p class="legend tactics-legend">백 차례 · 움직일 말을 누른 뒤 A, B, C 중 한곳을 고르세요.</p>
+    </div>
+    <div class="panel">
+      <div class="response" id="response" role="status" aria-atomic="true"><strong id="status"></strong><p id="detail"></p></div>
+      <button type="button" class="hint" id="hint" aria-expanded="false" aria-controls="hint-text">힌트 보기</button>
+      <p id="hint-text" hidden></p>
+      <div class="actions" id="actions">
+        <button type="button" class="retry" id="retry" hidden>이 수 다시 두기</button>
+        <button type="button" class="next" id="next" hidden>다음 수 →</button>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="finish" class="finish" aria-labelledby="finish-title" hidden>
+  <p class="eyebrow" id="finish-label"></p>
+  <h2 id="finish-title" tabindex="-1"></h2>
+  <p>공격할 땐 상대가 어떻게 응수할지, 수비할 땐 내 킹에 공격이 남는지 보세요.</p>
+  <div class="actions"><button type="button" class="retry" id="again">이 코스 처음부터 다시</button>
+  <button type="button" class="next" id="continue">다른 코스로 →</button>
+  <a class="retry" href="../#chess-01">기존 체스 퍼즐</a></div>
+</section>
+<noscript><p>연습판에서 두려면 브라우저에서 자바스크립트를 켜 주세요.</p></noscript>
+<footer>규칙과 전술을 연습하기 위한 예제입니다. <a href="../">바둑·체스·장기 한 수 미니</a></footer>
+</main>
+</body></html>
