@@ -852,6 +852,7 @@ const DIFF_CLASS = { '입문': 'easy', '중급': 'mid', '고급': 'hard' };
 const STORE_SOLVED = 'gochess.solved.v2';
 const STORE_DAILY = 'gochess.daily.v2';
 const STORE_STREAK = 'gochess.streak.v1';
+const STORE_LAST = 'gochess.last.v1';
 
 let typeFilter = 'all';
 let diffFilter = 'all';
@@ -1006,7 +1007,9 @@ function renderStreak(info) {
   const nextText = days === 0
     ? ' · 오늘의 한 수를 풀면 입문자 배지'
     : (next ? ' · 다음 ' + next.icon + ' ' + next.name + '까지 ' + (next.min - days) + '일' : ' · 최고 칭호 달성!');
-  stat.innerHTML = '연속 <b>' + days + '일</b> · 오늘의 한 수 <b>' + solvedDays + '개</b> 해결' + nextText;
+  const doneToday = !!(doneMap && typeof doneMap === 'object' && doneMap[info.key]);
+  const tomorrowText = doneToday ? ' · 내일 0시 새 한 수' : '';
+  stat.innerHTML = '연속 <b>' + days + '일</b> · 오늘의 한 수 <b>' + solvedDays + '개</b> 해결' + nextText + tomorrowText;
 }
 
 /* ---------- 필터/목록 ---------- */
@@ -2166,6 +2169,7 @@ function renderPuzzle() {
     hintBtn.setAttribute('aria-expanded', hintShown ? 'true' : 'false');
   }
   if (card) card.classList.toggle('is-daily', miniPuzzles.indexOf(p) === dailyIdx);
+  if (!(hubReview && hubReview.active)) safeSet(STORE_LAST, p.id);
 
   renderTabs();
   renderBoardOnly();
@@ -2419,8 +2423,20 @@ function init() {
   list = miniPuzzles.slice();
   refreshFilterCounts();
   const hashed = indexFromHash();
-  idx = hashed >= 0 ? hashed : dailyIdx;
+  let resumedIdx = -1;
+  if (hashed < 0) {
+    const lastId = safeGet(STORE_LAST, null);
+    if (lastId) {
+      const found = miniPuzzles.findIndex(function (p) { return p.id === lastId; });
+      if (found >= 0 && solvedIds().indexOf(lastId) === -1) resumedIdx = found;
+    }
+  }
+  idx = hashed >= 0 ? hashed : (resumedIdx >= 0 ? resumedIdx : dailyIdx);
   renderAll();
+  if (resumedIdx >= 0 && resumedIdx !== dailyIdx) {
+    const rp = miniPuzzles[resumedIdx];
+    showToast('이어서 보던 ' + typeName(rp) + ' ' + typeNo(rp) + '번부터 이어갑니다.');
+  }
   fitCoupangBanner();
   [400, 1200, 2600, 4200].forEach(function (t) { window.setTimeout(fitCoupangBanner, t); });
   window.addEventListener('resize', fitCoupangBanner);
