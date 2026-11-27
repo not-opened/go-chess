@@ -185,4 +185,6 @@ $('again').addEventListener('click', () => {
   solved.clear();
   openLesson(0,true);
 });
-openLesson(0);
+// A Shorts viewer can open the exact practice position without seeing its answer.
+const requestedStep = Number(new URLSearchParams(location.search).get('step'));
+openLesson(Number.isInteger(requestedStep) && requestedStep>=1 && requestedStep<=lessons.length ? requestedStep-1 : 0);
