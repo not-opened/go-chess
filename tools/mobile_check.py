@@ -69,8 +69,8 @@ def run(url, shot_prefix, out_json, vw, vh):
         check("lang=ko", page.locator("html").get_attribute("lang") == "ko")
 
         # ---------- 헤더: 유튜브 배너 최상단 + 배지 제거 ----------
-        banner = page.locator(".yt-banner")
-        check("유튜브 배너 1개", banner.count() == 1, banner.count())
+        banner = page.locator(".yt-banner:not(#top-fortune-consult)")
+        check("유튜브 배너 1개(무료운세 상담 배너 제외)", banner.count() == 1, banner.count())
         if banner.count() == 1:
             href = banner.get_attribute("href")
             check("유튜브 링크", href == "https://www.youtube.com/@notopened", href)
@@ -80,8 +80,8 @@ def run(url, shot_prefix, out_json, vw, vh):
             box = banner.bounding_box()
             check("배너 높이 44px 이상", box and box["height"] >= 44, box and round(box["height"]))
             fit = page.evaluate("""() => {
-              const b = document.querySelector('.yt-banner');
-              const t = b.querySelector('.yt-text');
+              const t = document.querySelector('.yt-banner .yt-text');
+              const b = t ? t.closest('.yt-banner') : document.querySelector('.yt-banner');
               const br = b.getBoundingClientRect();
               const tr = t.getBoundingClientRect();
               return {
@@ -184,7 +184,7 @@ def run(url, shot_prefix, out_json, vw, vh):
             page.locator(f'[data-row="{wrong["to"][0]}"][data-col="{wrong["to"][1]}"]').click(force=True)
             page.wait_for_timeout(200)
             check("장기 오답 피드백", "아쉽" in page.locator("#feedbackStatus").inner_text(), page.locator("#feedbackStatus").inner_text())
-            check("오답도 실제 이동 표시", page.evaluate("() => !!document.querySelector('#boardWrap circle[stroke=\"#ef4444\"]')"))
+            check("오답도 실제 이동 표시", page.evaluate("() => document.querySelectorAll('#boardWrap line[stroke=\"#dc2626\"]').length >= 2"))
             why = page.locator("#feedbackWhy")
             check("장기 오답 이유 한 줄", (not why.is_hidden()) and "장군" in why.inner_text(), why.inner_text())
             check("오답 시 정답 비공개", page.locator("#feedbackAnswer").inner_text() == "", page.locator("#feedbackAnswer").inner_text())
@@ -359,11 +359,12 @@ def run(url, shot_prefix, out_json, vw, vh):
         ov320 = page.evaluate("() => ({sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth})")
         check("320 가로 넘침 없음", ov320["sw"] <= ov320["cw"] + 1, ov320)
         yt320 = page.evaluate("""() => {
-          const b = document.querySelector('.yt-banner');
-          const t = b.querySelector('.yt-text');
+          const t = document.querySelector('.yt-banner .yt-text');
+          const b = t ? t.closest('.yt-banner') : document.querySelector('.yt-banner');
+          if (!t || !b) return {h: 0, inside: false, url: location.href, banners: document.querySelectorAll('.yt-banner').length, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth};
           const br = b.getBoundingClientRect();
           const tr = t.getBoundingClientRect();
-          return {h: Math.round(br.height), inside: tr.top >= br.top - 1 && tr.bottom <= br.bottom + 1, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth};
+          return {h: Math.round(br.height), inside: tr.top >= br.top - 1 && tr.bottom <= br.bottom + 1, url: location.href, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth};
         }""")
         check("320 유튜브 배너 문구가 잘리지 않음", yt320["inside"] and yt320["h"] >= 44 and yt320["sw"] <= yt320["cw"] + 1, yt320)
         check("320 장기판 히트칸 90", page.locator("#boardWrap rect.jg-hit").count() == 90)

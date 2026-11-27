@@ -206,6 +206,37 @@ body {
 .daily-btn.done { border-color: rgba(34, 197, 94, 0.6); background: linear-gradient(135deg, rgba(34,197,94,0.20), rgba(34,197,94,0.05)); }
 .daily-btn.done .daily-sub { color: #86efac; }
 
+/* 연속 정답 스트릭 · 칭호 배지 */
+.streak-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0 2px;
+}
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(250, 204, 21, 0.55);
+  background: rgba(250, 204, 21, 0.12);
+  color: #fde68a;
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.streak-badge.up { border-color: rgba(34, 197, 94, 0.7); background: rgba(34,197,94,0.16); color: #86efac; }
+.streak-stat {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  word-break: keep-all;
+  min-width: 0;
+}
+.streak-stat b { color: #f8fafc; }
+
 .filter-bar {
   display: flex;
   gap: 6px;
@@ -648,6 +679,10 @@ body {
           <span class="daily-sub" id="dailySub">오늘의 문제를 불러오는 중…</span>
         </span>
       </button>
+      <div class="streak-row" id="streakRow" aria-live="polite">
+        <span class="streak-badge" id="streakBadge">🌱 입문자</span>
+        <span class="streak-stat" id="streakStat">연속 0일 · 오늘의 한 수 0개 해결</span>
+      </div>
     </header>
 
     <nav class="filter-bar" id="typeFilters" aria-label="종목 필터">
@@ -816,6 +851,7 @@ window.miniPuzzles = miniPuzzles;
 const DIFF_CLASS = { '입문': 'easy', '중급': 'mid', '고급': 'hard' };
 const STORE_SOLVED = 'gochess.solved.v2';
 const STORE_DAILY = 'gochess.daily.v2';
+const STORE_STREAK = 'gochess.streak.v1';
 
 let typeFilter = 'all';
 let diffFilter = 'all';
@@ -886,14 +922,91 @@ function renderDaily() {
   if (title) title.textContent = done ? '오늘의 한 수 완료 — 다시 풀기' : '오늘의 한 수 바로 풀기';
   if (btn) btn.classList.toggle('done', done);
   if (icon) icon.textContent = done ? '✅' : '🎯';
+  renderStreak(info);
 }
 
 function markDailyDone(p) {
   const info = kstDateKey();
   const map = safeGet(STORE_DAILY, {}) || {};
+  const first = !map[info.key];
   map[info.key] = p.id;
   safeSet(STORE_DAILY, map);
+  if (first) bumpStreak(info);
   renderDaily();
+}
+
+/* ---------- 연속 정답 스트릭 · 칭호 배지 ---------- */
+const STREAK_TITLES = [
+  { min: 30, icon: '👑', name: '국수' },
+  { min: 21, icon: '🏅', name: '명인' },
+  { min: 14, icon: '🥇', name: '달인' },
+  { min: 7, icon: '🥈', name: '고급 기사' },
+  { min: 5, icon: '🥉', name: '중급 기사' },
+  { min: 3, icon: '🔰', name: '초급 기사' },
+  { min: 1, icon: '🌱', name: '입문자' },
+  { min: 0, icon: '🌱', name: '입문자' }
+];
+
+function titleFor(days) {
+  for (let i = 0; i < STREAK_TITLES.length; i++) {
+    if (days >= STREAK_TITLES[i].min) return STREAK_TITLES[i];
+  }
+  return STREAK_TITLES[STREAK_TITLES.length - 1];
+}
+
+function nextTitle(days) {
+  const cur = titleFor(days);
+  let best = null;
+  for (let i = 0; i < STREAK_TITLES.length; i++) {
+    const t = STREAK_TITLES[i];
+    if (t.min > days && t.name !== cur.name && (!best || t.min < best.min)) best = t;
+  }
+  return best;
+}
+
+function loadStreak() {
+  const v = safeGet(STORE_STREAK, null);
+  const obj = (v && typeof v === 'object') ? v : {};
+  return {
+    last: typeof obj.last === 'number' ? obj.last : null,
+    days: Math.max(0, Math.floor(Number(obj.days) || 0)),
+    best: Math.max(0, Math.floor(Number(obj.best) || 0))
+  };
+}
+
+/* 오늘 풀지 않았어도 어제까지 이어졌으면 연속은 살아 있다. */
+function effectiveStreak(st, info) {
+  if (!st.days || st.last === null) return 0;
+  if (st.last === info.dayNumber || st.last === info.dayNumber - 1) return st.days;
+  return 0;
+}
+
+function bumpStreak(info) {
+  const st = loadStreak();
+  if (st.last === info.dayNumber) return st;
+  st.days = (st.last === info.dayNumber - 1) ? Math.max(1, st.days) + 1 : 1;
+  st.last = info.dayNumber;
+  st.best = Math.max(st.best, st.days);
+  safeSet(STORE_STREAK, st);
+  return st;
+}
+
+function renderStreak(info) {
+  const badge = document.getElementById('streakBadge');
+  const stat = document.getElementById('streakStat');
+  if (!badge || !stat) return;
+  const st = loadStreak();
+  const days = effectiveStreak(st, info);
+  const t = titleFor(days);
+  const doneMap = safeGet(STORE_DAILY, {});
+  const solvedDays = (doneMap && typeof doneMap === 'object') ? Object.keys(doneMap).length : 0;
+  badge.textContent = t.icon + ' ' + t.name;
+  badge.classList.toggle('up', days >= 3);
+  const next = nextTitle(days);
+  const nextText = days === 0
+    ? ' · 오늘의 한 수를 풀면 입문자 배지'
+    : (next ? ' · 다음 ' + next.icon + ' ' + next.name + '까지 ' + (next.min - days) + '일' : ' · 최고 칭호 달성!');
+  stat.innerHTML = '연속 <b>' + days + '일</b> · 오늘의 한 수 <b>' + solvedDays + '개</b> 해결' + nextText;
 }
 
 /* ---------- 필터/목록 ---------- */
@@ -1035,6 +1148,95 @@ function stonesToMap(p) {
 }
 
 /* ---------- 보드 렌더 (바둑) ---------- */
+/* ---------- 수순 하이라이트(출발→도착 화살표·정답 표시) ---------- */
+function moveArrow(svgNS, svg, x1, y1, x2, y2, color, opts) {
+  const o = opts || {};
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+  const ux = dx / len, uy = dy / len;
+  const startGap = o.startGap || 0;
+  const endGap = o.endGap || 14;
+  const sx = x1 + ux * startGap, sy = y1 + uy * startGap;
+  const ex = x2 - ux * endGap, ey = y2 - uy * endGap;
+  const g = document.createElementNS(svgNS, 'g');
+  g.setAttribute('pointer-events', 'none');
+  const line = document.createElementNS(svgNS, 'line');
+  line.setAttribute('x1', sx.toFixed(1)); line.setAttribute('y1', sy.toFixed(1));
+  line.setAttribute('x2', ex.toFixed(1)); line.setAttribute('y2', ey.toFixed(1));
+  line.setAttribute('stroke', color);
+  line.setAttribute('stroke-width', String(o.width || 4));
+  line.setAttribute('stroke-linecap', 'round');
+  if (o.dash) line.setAttribute('stroke-dasharray', o.dash);
+  g.appendChild(line);
+  const ang = Math.atan2(ey - sy, ex - sx);
+  const head = o.head || 10;
+  const pts = [
+    [ex, ey],
+    [ex - head * Math.cos(ang - 0.42), ey - head * Math.sin(ang - 0.42)],
+    [ex - head * Math.cos(ang + 0.42), ey - head * Math.sin(ang + 0.42)]
+  ];
+  const poly = document.createElementNS(svgNS, 'polygon');
+  poly.setAttribute('points', pts.map(function (pt) { return pt[0].toFixed(1) + ',' + pt[1].toFixed(1); }).join(' '));
+  poly.setAttribute('fill', color);
+  g.appendChild(poly);
+  svg.appendChild(g);
+  return g;
+}
+
+function answerMark(svgNS, svg, x, y, color, dashed, r) {
+  const ring = document.createElementNS(svgNS, 'circle');
+  ring.setAttribute('cx', x); ring.setAttribute('cy', y);
+  ring.setAttribute('r', String(r || 16));
+  ring.setAttribute('fill', 'none');
+  ring.setAttribute('stroke', color);
+  ring.setAttribute('stroke-width', '3.2');
+  if (dashed) ring.setAttribute('stroke-dasharray', '5 4');
+  ring.setAttribute('pointer-events', 'none');
+  svg.appendChild(ring);
+  const dot = document.createElementNS(svgNS, 'circle');
+  dot.setAttribute('cx', x); dot.setAttribute('cy', y);
+  dot.setAttribute('r', '4.5');
+  dot.setAttribute('fill', color);
+  dot.setAttribute('pointer-events', 'none');
+  svg.appendChild(dot);
+}
+
+function wrongMark(svgNS, svg, x, y, color, half) {
+  const h = half || 8;
+  [1, -1].forEach(function (sgn) {
+    const l = document.createElementNS(svgNS, 'line');
+    l.setAttribute('x1', x - h); l.setAttribute('y1', y - sgn * h);
+    l.setAttribute('x2', x + h); l.setAttribute('y2', y + sgn * h);
+    l.setAttribute('stroke', color);
+    l.setAttribute('stroke-width', '3.6');
+    l.setAttribute('stroke-linecap', 'round');
+    l.setAttribute('pointer-events', 'none');
+    svg.appendChild(l);
+  });
+}
+
+function pointLabel(svgNS, svg, x, y, text, color) {
+  const vb = String(svg.getAttribute('viewBox') || '0 0 0 0').split(/\s+/).map(Number);
+  const vbW = vb[2] || 0, vbH = vb[3] || 0;
+  let ty = y - 21;
+  if (vbH && ty < 14) ty = y + 32;
+  let tx = x;
+  if (vbW) tx = Math.min(Math.max(x, 36), vbW - 36);
+  const t = document.createElementNS(svgNS, 'text');
+  t.setAttribute('x', tx);
+  t.setAttribute('y', ty);
+  t.setAttribute('text-anchor', 'middle');
+  t.setAttribute('font-size', '12');
+  t.setAttribute('font-weight', '700');
+  t.setAttribute('fill', color);
+  t.setAttribute('stroke', '#ffffff');
+  t.setAttribute('stroke-width', '2.6');
+  t.setAttribute('paint-order', 'stroke');
+  t.setAttribute('pointer-events', 'none');
+  t.textContent = text;
+  svg.appendChild(t);
+}
+
 function renderGoBoard(p) {
   const size = p.size;
   const pad = 20;
@@ -1139,17 +1341,20 @@ function renderGoBoard(p) {
     }
   }
 
-  // 마지막 수 표시 (돌 위에 그린다)
+  // 마지막 수·정답 하이라이트 (출발→도착 / 핵심 포인트)
   if (played && played.board) {
-    const mk = document.createElementNS(svgNS, 'circle');
-    mk.setAttribute('cx', pad + played.c * cell);
-    mk.setAttribute('cy', pad + played.r * cell);
-    mk.setAttribute('r', '6');
-    mk.setAttribute('fill', 'none');
-    mk.setAttribute('stroke', played.isCorrect ? '#22c55e' : '#ef4444');
-    mk.setAttribute('stroke-width', '3');
-    mk.setAttribute('pointer-events', 'none');
-    svg.appendChild(mk);
+    const ax = pad + p.answer.c * cell;
+    const ay = pad + p.answer.r * cell;
+    if (played.isCorrect) {
+      answerMark(svgNS, svg, ax, ay, '#16a34a', false, 17);
+      pointLabel(svgNS, svg, ax, ay, '정답', '#15803d');
+    } else {
+      wrongMark(svgNS, svg, pad + played.c * cell, pad + played.r * cell, '#dc2626', 11);
+      moveArrow(svgNS, svg, pad + played.c * cell, pad + played.r * cell, ax, ay,
+        '#22c55e', { dash: '6 5', width: 3, startGap: 18, endGap: 20 });
+      answerMark(svgNS, svg, ax, ay, '#22c55e', true, 16);
+      pointLabel(svgNS, svg, ax, ay, '정답 자리', '#15803d');
+    }
   }
   return svg;
 }
@@ -1224,6 +1429,24 @@ function renderChessBoard(p) {
     cl.setAttribute('fill', '#94a3b8');
     cl.textContent = String.fromCharCode(97 + c);
     svg.appendChild(cl);
+  }
+
+  // 수순 하이라이트: 내가 둔 수 → 정답 수
+  if (played) {
+    const cx = function (c) { return offsetX + c * cell + cell / 2; };
+    const cy = function (r) { return offsetY + r * cell + cell / 2; };
+    const mf = p.moverFrom;
+    const ax = cx(p.answer.c), ay = cy(p.answer.r);
+    if (played.isCorrect) {
+      moveArrow(svgNS, svg, cx(mf.c), cy(mf.r), ax, ay, '#16a34a', { width: 5, startGap: 18, endGap: 22 });
+      answerMark(svgNS, svg, ax, ay, '#16a34a', false, 18);
+      pointLabel(svgNS, svg, ax, ay, '정답 수', '#15803d');
+    } else {
+      moveArrow(svgNS, svg, cx(mf.c), cy(mf.r), ax, ay, '#22c55e', { dash: '6 5', width: 3.2, startGap: 18, endGap: 22 });
+      answerMark(svgNS, svg, ax, ay, '#22c55e', true, 17);
+      wrongMark(svgNS, svg, cx(played.c), cy(played.r), '#dc2626', 10);
+      pointLabel(svgNS, svg, ax, ay, '정답 칸', '#15803d');
+    }
   }
 
   pmap.forEach(function (x) {
@@ -1660,29 +1883,26 @@ function renderJanggiBoard(p) {
     svg.appendChild(s);
   }
 
-  // 마지막 수 표시
+  // 마지막 수·정답 하이라이트 (출발 → 도착)
   if (played && played.board) {
-    const col = played.isCorrect ? '#22c55e' : '#ef4444';
-    const mk = document.createElementNS(svgNS, 'circle');
-    mk.setAttribute('cx', pad + played.c * cell);
-    mk.setAttribute('cy', pad + played.r * cell);
-    mk.setAttribute('r', '16');
-    mk.setAttribute('fill', 'none');
-    mk.setAttribute('stroke', col);
-    mk.setAttribute('stroke-width', '2.6');
-    mk.setAttribute('pointer-events', 'none');
-    svg.appendChild(mk);
-    if (played.from) {
-      const fr = document.createElementNS(svgNS, 'circle');
-      fr.setAttribute('cx', pad + played.from[1] * cell);
-      fr.setAttribute('cy', pad + played.from[0] * cell);
-      fr.setAttribute('r', '16');
-      fr.setAttribute('fill', 'none');
-      fr.setAttribute('stroke', col);
-      fr.setAttribute('stroke-width', '1.2');
-      fr.setAttribute('stroke-dasharray', '3 3');
-      fr.setAttribute('pointer-events', 'none');
-      svg.appendChild(fr);
+    const ax = pad + p.answer.to.c * cell;
+    const ay = pad + p.answer.to.r * cell;
+    const fx = pad + p.answer.from.c * cell;
+    const fy = pad + p.answer.from.r * cell;
+    if (played.isCorrect) {
+      moveArrow(svgNS, svg, fx, fy, ax, ay, '#16a34a', { width: 4.6, startGap: 16, endGap: 18 });
+      answerMark(svgNS, svg, ax, ay, '#16a34a', false, 17);
+      pointLabel(svgNS, svg, ax, ay, '정답 수', '#15803d');
+    } else {
+      if (played.from) {
+        wrongMark(svgNS, svg, pad + played.from[1] * cell, pad + played.from[0] * cell, '#dc2626', 9);
+        moveArrow(svgNS, svg, pad + played.from[1] * cell, pad + played.from[0] * cell,
+          pad + played.c * cell, pad + played.r * cell, '#ef4444', { width: 2.6, startGap: 14, endGap: 14 });
+      }
+      wrongMark(svgNS, svg, pad + played.c * cell, pad + played.r * cell, '#dc2626', 10);
+      moveArrow(svgNS, svg, fx, fy, ax, ay, '#22c55e', { dash: '6 5', width: 3, startGap: 16, endGap: 18 });
+      answerMark(svgNS, svg, ax, ay, '#22c55e', true, 16);
+      pointLabel(svgNS, svg, ax, ay, '정답 자리', '#15803d');
     }
   }
   return svg;
@@ -1892,8 +2112,8 @@ function renderFeedback(p, isCorrect, note) {
     ok: false,
     status: '❌ 아쉽습니다 — 그 수로는 목표에 닿지 않습니다.',
     note: note || '',
-    text: reveal ? '두 번째 시도도 아쉬웠습니다. 아래 해설에서 정답을 확인해 보세요.'
-                 : '왜 안 되는지 확인하고 바로 다시 두거나, 힌트를 먼져 볼 수 있습니다.',
+    text: reveal ? '두 번째 시도도 아쉬웠습니다. 보드의 초록 표시에서 정답 자리를 확인해 보세요.'
+                 : '왜 안 되는지 확인하고 바로 다시 두거나, 힌트를 먼저 볼 수 있습니다.',
     answer: reveal ? '정답: ' + p.answerText : '',
     source: reveal ? '출처: ' + p.source : '',
     actions: true,
@@ -1906,7 +2126,7 @@ function showIllegalFeedback(note) {
     ok: false,
     status: '❌ 둘 수 없는 자리입니다.',
     note: note || '',
-    text: '보드는 그대로 두었습니다. 다른 자리를 곱라 주세요.',
+    text: '보드는 그대로 두었습니다. 다른 자리를 골라 주세요.',
     answer: '',
     source: '',
     actions: true,
