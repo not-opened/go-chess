@@ -285,6 +285,7 @@ body {
   margin-right: 2px;
 }
 
+.progress-breakdown { margin-top: 2px; font-size: 0.7rem; color: var(--text-muted); }
 .progress-line {
   text-align: center;
   font-size: 0.74rem;
@@ -752,6 +753,7 @@ body {
     </nav>
 
     <p class="progress-line">푼 문제 <b id="solvedCount">0</b> / <span id="totalCount">45</span></p>
+    <p class="progress-line progress-breakdown" id="solvedBreakdown"></p>
 
     <section class="hub-mistakes" aria-label="오답 다시 풀기" id="hubMistakes" hidden>
       <button type="button" class="btn-secondary" id="hubWrongStart">오답 다시 풀기</button>
@@ -906,9 +908,22 @@ function markSolved(id) {
 }
 function renderProgress() {
   const el = document.getElementById('solvedCount');
-  if (el) el.textContent = String(Math.min(solvedIds().length, miniPuzzles.length));
+  const ids = solvedIds();
+  if (el) el.textContent = String(Math.min(ids.length, miniPuzzles.length));
   const total = document.getElementById('totalCount');
   if (total) total.textContent = String(miniPuzzles.length);
+  const breakdown = document.getElementById('solvedBreakdown');
+  if (breakdown) {
+    const solved = new Set(ids);
+    const order = ['입문', '중급', '고급'];
+    const stat = { '입문': [0, 0], '중급': [0, 0], '고급': [0, 0] };
+    miniPuzzles.forEach(function (p) {
+      const s = stat[p.difficulty] || stat['입문'];
+      s[1] += 1;
+      if (solved.has(p.id)) s[0] += 1;
+    });
+    breakdown.textContent = order.map(function (k) { return k + ' ' + stat[k][0] + '/' + stat[k][1]; }).join(' · ');
+  }
 }
 
 /* ---------- 날짜(한국 시간) 기반 오늘의 한 수 ---------- */
