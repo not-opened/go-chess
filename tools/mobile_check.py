@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""모바일 검증 — 30문항(바둑·체스·장기)·장기 조작·공유·쿠팡 배너·가로 넘침.
+"""모바일 검증 — 45문항(바둑·체스·장기)·장기 조작·공유·쿠팡 배너·가로 넘침.
 
     python3 tools/mobile_check.py --url http://127.0.0.1:8777/
     python3 tools/mobile_check.py --url https://notopened.com/go-chess/ \\
@@ -63,7 +63,7 @@ def run(url, shot_prefix, out_json, vw, vh):
         check("제목", "바둑·체스·장기 한 수 미니" in page.title(), page.title())
         check("canonical", page.locator('link[rel="canonical"]').get_attribute("href") == "https://notopened.com/go-chess/")
         check("og:image", (page.locator('meta[property="og:image"]').get_attribute("content") or "").endswith("/og.png"))
-        check("og:description 30문항", "30문항" in (page.locator('meta[property="og:description"]').get_attribute("content") or ""))
+        check("og:description 45문항", "45문항" in (page.locator('meta[property="og:description"]').get_attribute("content") or ""))
         check("twitter card", page.locator('meta[name="twitter:card"]').get_attribute("content") == "summary_large_image")
         check("JSON-LD", "WebApplication" in (page.locator('script[type="application/ld+json"]').inner_text() or ""))
         check("lang=ko", page.locator("html").get_attribute("lang") == "ko")
@@ -98,20 +98,20 @@ def run(url, shot_prefix, out_json, vw, vh):
         check("가로 넘침 없음(배너)", page.evaluate("() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1"))
 
         # ---------- 문항 수·필터 ----------
-        check("진행 표시 30", page.locator("#totalCount").inner_text() == "30", page.locator("#totalCount").inner_text())
+        check("진행 표시 45", page.locator("#totalCount").inner_text() == "45", page.locator("#totalCount").inner_text())
         tabs = page.locator(".puzzle-tab")
-        check("탭 30개", tabs.count() == 30, tabs.count())
-        for typ, n in (("go", 10), ("chess", 10), ("janggi", 10)):
+        check("탭 45개", tabs.count() == 45, tabs.count())
+        for typ, n in (("go", 15), ("chess", 15), ("janggi", 15)):
             page.locator(f'#typeFilters .filter-chip[data-type="{typ}"]').click()
             page.wait_for_timeout(150)
             check(f"{typ} 필터 {n}문항", page.locator(".puzzle-tab").count() == n, page.locator(".puzzle-tab").count())
         page.locator('#typeFilters .filter-chip[data-type="janggi"]').click()
         page.locator('#diffFilters .filter-chip[data-diff="입문"]').click()
         page.wait_for_timeout(150)
-        check("장기+입문 4문항", page.locator(".puzzle-tab").count() == 4)
+        check("장기+입문 6문항", page.locator(".puzzle-tab").count() == 6)
         page.locator('#diffFilters .filter-chip[data-diff="고급"]').click()
         page.wait_for_timeout(150)
-        check("장기+고급 3문항", page.locator(".puzzle-tab").count() == 3)
+        check("장기+고급 4문항", page.locator(".puzzle-tab").count() == 4)
         page.locator('#diffFilters .filter-chip[data-diff="all"]').click()
         page.wait_for_timeout(150)
 
@@ -146,6 +146,10 @@ def run(url, shot_prefix, out_json, vw, vh):
         check("장기 정답 표기", ans["text"] in page.locator("#feedbackAnswer").inner_text(),
               (ans["text"], page.locator("#feedbackAnswer").inner_text()))
         check("풀이 카운트 1", page.locator("#solvedCount").inner_text() == "1", page.locator("#solvedCount").inner_text())
+        png = page.evaluate("""async () => {
+          try { const b = await window.buildShareImage(); return b ? b.size : 0; } catch (e) { return -1; }
+        }""")
+        check("결과 PNG 생성", png > 20000, png)
         page.screenshot(path=f"{shot_prefix}-solved.png")
         result["screenshots"].append(f"{shot_prefix}-solved.png")
 
@@ -181,8 +185,16 @@ def run(url, shot_prefix, out_json, vw, vh):
             page.wait_for_timeout(200)
             check("장기 오답 피드백", "아쉽" in page.locator("#feedbackStatus").inner_text(), page.locator("#feedbackStatus").inner_text())
             check("오답도 실제 이동 표시", page.evaluate("() => !!document.querySelector('#boardWrap circle[stroke=\"#ef4444\"]')"))
-            page.locator("#retryBtn").click()
+            why = page.locator("#feedbackWhy")
+            check("장기 오답 이유 한 줄", (not why.is_hidden()) and "장군" in why.inner_text(), why.inner_text())
+            check("오답 시 정답 비공개", page.locator("#feedbackAnswer").inner_text() == "", page.locator("#feedbackAnswer").inner_text())
+            check("오답 액션 버튼 2개", (not page.locator("#fbRetryBtn").is_hidden()) and (not page.locator("#fbHintBtn").is_hidden()))
+            page.locator("#fbHintBtn").click()
             page.wait_for_timeout(150)
+            check("오답 화면에서 힌트 보기", len(page.locator("#hintBox").inner_text()) > 8, page.locator("#hintBox").inner_text())
+            page.locator("#fbRetryBtn").click()
+            page.wait_for_timeout(150)
+            check("바로 다시 → 피드백·힌트 초기화", page.locator("#feedbackBox.show").count() == 0 and page.locator("#hintBox").is_hidden())
         else:
             check("장기 오답 후보 존재", False, "합법수 없음")
         page.locator("#nextBtn").click()
@@ -208,7 +220,7 @@ def run(url, shot_prefix, out_json, vw, vh):
                     diffs.append({"id": item["id"], "py": len(item["moves"]), "js": len(got),
                                   "onlyPy": [m for m in item["moves"] if m not in got][:6],
                                   "onlyJs": [m for m in got if m not in item["moves"]][:6]})
-            check("장기 JS·파이썬 합법수 일치(10문항)", not diffs, diffs)
+            check("장기 JS·파이썬 합법수 일치(15문항)", not diffs, diffs)
         else:
             check("장기 합법수 기대값 파일", False, expected_path)
 
@@ -224,7 +236,10 @@ def run(url, shot_prefix, out_json, vw, vh):
         page.locator('[data-row="0"][data-col="0"]').click(force=True)
         page.wait_for_timeout(200)
         check("바둑 오답", "아쉽" in page.locator("#feedbackStatus").inner_text())
-        page.locator("#retryBtn").click()
+        bwhy = page.locator("#feedbackWhy").inner_text()
+        check("바둑 오답 이유 한 줄", "단수가" in bwhy, bwhy)
+        check("바둑 오답 시 정답 비공개", page.locator("#feedbackAnswer").inner_text() == "", page.locator("#feedbackAnswer").inner_text())
+        page.locator("#fbRetryBtn").click()
         page.wait_for_timeout(150)
         page.locator('[data-row="4"][data-col="4"]').click(force=True)
         page.wait_for_timeout(250)
@@ -240,7 +255,19 @@ def run(url, shot_prefix, out_json, vw, vh):
         check("체스 정답", "정답" in page.locator("#feedbackStatus").inner_text())
         check("체스 기물 이동", page.evaluate("""() => !!document.querySelector('#boardWrap [data-piece="Q"][data-side="W"][data-square="e8"]')"""))
 
-        # ---------- 30문항 전수 정답 탭 ----------
+        # ---------- 체스 오답 이유(미리 계산된 칸별 근거) ----------
+        page.locator(".puzzle-tab").nth(0).click()
+        page.wait_for_timeout(200)
+        page.locator('#boardWrap rect[aria-label^="b1 "]').click(force=True)
+        page.wait_for_timeout(200)
+        cwhy = page.locator("#feedbackWhy").inner_text()
+        check("체스 오답 이유 한 줄", "체크가 아닙니다" in cwhy, cwhy)
+        check("체스 오답 시 정답 비공개", page.locator("#feedbackAnswer").inner_text() == "", page.locator("#feedbackAnswer").inner_text())
+        page.locator("#fbRetryBtn").click()
+        page.wait_for_timeout(150)
+        check("체스 바로 다시 → 피드백 초기화", page.locator("#feedbackBox.show").count() == 0)
+
+        # ---------- 45문항 전수 정답 탭 ----------
         page.locator('#typeFilters .filter-chip[data-type="all"]').click()
         page.wait_for_timeout(200)
         puzzles = page.evaluate("""() => window.miniPuzzles.map(p => ({id:p.id, type:p.type, answer:p.answer}))""")
@@ -263,13 +290,13 @@ def run(url, shot_prefix, out_json, vw, vh):
             status = page.locator("#feedbackStatus").inner_text()
             if "정답" not in status:
                 bad.append(pzl["id"] + ":" + status)
-        check("30문항 정답 탭 모두 정답", not bad, bad)
-        check("30문항 모두 푼 것으로 기록", page.locator("#solvedCount").inner_text() == "30", page.locator("#solvedCount").inner_text())
+        check("45문항 정답 탭 모두 정답", not bad, bad)
+        check("45문항 모두 푼 것으로 기록", page.locator("#solvedCount").inner_text() == "45", page.locator("#solvedCount").inner_text())
 
         page.locator("#shareBtn").click()
         page.wait_for_timeout(400)
         clip = page.evaluate("() => navigator.clipboard.readText()")
-        check("공유 문구", "바둑·체스·장기 한 수 미니" in clip and "푼 문제 30/30" in clip, clip)
+        check("공유 문구", "바둑·체스·장기 한 수 미니" in clip and "푼 문제 45/45" in clip, clip)
         check("공유 링크", "https://notopened.com/go-chess/" in clip, clip)
 
         # ---------- 하단 링크 ----------
@@ -279,8 +306,10 @@ def run(url, shot_prefix, out_json, vw, vh):
         check("푸터에 사주 중복 없음", not any("fortune" in x for x in footer), joined)
         check("푸터에 퀴즈 중복 없음", not any("/quiz/" in x for x in footer), joined)
         check("푸터 개인정보", any("privacy.html" in x for x in footer), joined)
-        cards = page.evaluate("""() => [...document.querySelectorAll('.web-card')].map(a => a.textContent.replace(/\\s+/g, ' ').trim())""")
+        cards = page.evaluate("""() => [...document.querySelectorAll('.cross-promo .web-card')].map(a => a.textContent.replace(/\\s+/g, ' ').trim())""")
         check("바로가기 카드 2개", len(cards) == 2, cards)
+        lessons = page.evaluate("""() => [...document.querySelectorAll('a.web-card[href^="./"]')].map(a => a.textContent.replace(/\\s+/g, ' ').trim())""")
+        check("학습 카드 4개", len(lessons) == 4, lessons)
         check("카드에 내부 번호 없음", not any("호" in c for c in cards), cards)
 
         # ---------- 배너·넘침 ----------

@@ -89,7 +89,7 @@ HTML = """<!DOCTYPE html>
   <span class="badge">notopened</span>
   <h1>바둑 · 체스 · 장기<span class="accent">한 수 미니</span></h1>
   <div class="sub">사활 · 체크메이트 · 외통수를<br>단 한 수로 풀어 보세요</div>
-  <div class="meta">입문 · 중급 · 고급 <b>30문항</b></div>
+  <div class="meta">입문 · 중급 · 고급 <b>45문항</b></div>
 </div>
 <div class="boards">
   <div class="col">{go}<div class="cap">바둑</div></div>

@@ -5,13 +5,13 @@
   <meta name="google-site-verification" content="rfNAzH-8GWrvCKUE36EPhCVQZEv9g8NoEzKDVt_xvDE" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>바둑·체스·장기 한 수 미니 | notopened</title>
-  <meta name="description" content="설치 없이 브라우저에서 바로 푸는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수. 입문·중급·고급 30문항과 매일 바뀌는 오늘의 한 수.">
+  <meta name="description" content="설치 없이 브라우저에서 바로 푸는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수. 입문·중급·고급 45문항과 매일 바뀌는 오늘의 한 수.">
   <link rel="canonical" href="https://notopened.com/go-chess/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ko_KR">
   <meta property="og:site_name" content="notopened">
   <meta property="og:title" content="바둑·체스·장기 한 수 미니">
-  <meta property="og:description" content="단 한 수로 승부를 가르는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수 퍼즐 30문항.">
+  <meta property="og:description" content="단 한 수로 승부를 가르는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수 퍼즐 45문항.">
   <meta property="og:url" content="https://notopened.com/go-chess/">
   <meta property="og:image" content="https://notopened.com/go-chess/og.png">
   <meta property="og:image:width" content="1200">
@@ -19,7 +19,7 @@
   <meta property="og:image:alt" content="바둑판과 체스판, 장기판이 있는 바둑·체스·장기 한 수 미니">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="바둑·체스·장기 한 수 미니">
-  <meta name="twitter:description" content="단 한 수로 승부를 가르는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수 퍼즐 30문항.">
+  <meta name="twitter:description" content="단 한 수로 승부를 가르는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수 퍼즐 45문항.">
   <meta name="twitter:image" content="https://notopened.com/go-chess/og.png">
   <meta name="twitter:image:alt" content="바둑판과 체스판, 장기판이 있는 바둑·체스·장기 한 수 미니">
   <script type="application/ld+json">
@@ -30,7 +30,7 @@
     "alternateName": "notopened 바둑·체스·장기 한 수 미니",
     "url": "https://notopened.com/go-chess/",
     "inLanguage": "ko",
-    "description": "설치 없이 브라우저에서 바로 푸는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수 한 수 퍼즐 30문항.",
+    "description": "설치 없이 브라우저에서 바로 푸는 바둑 사활·따내기, 체스 체크메이트, 장기 외통수 한 수 퍼즐 45문항.",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Any",
     "isAccessibleForFree": true,
@@ -402,6 +402,44 @@ body {
 .feedback-box.ng { border-color: var(--wrong); }
 .feedback-box strong { display: block; margin-bottom: 5px; font-size: 0.9rem; }
 
+.feedback-why {
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border-left: 3px solid var(--wrong);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.feedback-why[hidden] { display: none; }
+
+.feedback-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.feedback-actions[hidden] { display: none; }
+.feedback-actions button {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 8px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.feedback-actions button.fb-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0f172a;
+}
+
 .feedback-answer {
   margin-top: 8px;
   font-size: 0.76rem;
@@ -588,7 +626,7 @@ body {
         <h1>바둑 · 체스 · 장기 한 수 미니</h1>
         <button type="button" class="icon-toggle-btn" id="soundToggleBtn" aria-label="효과음 켜기/끄기" title="효과음 켜기/끄기">🔊</button>
       </div>
-      <p>단 한 수로 끝내는 30초 두뇌 퍼즐 · 입문부터 고급까지 30문항</p>
+      <p>단 한 수로 끝내는 30초 두뇌 퍼즐 · 입문부터 고급까지 45문항</p>
       <button type="button" class="daily-btn" id="dailyBtn" aria-label="오늘의 한 수 바로 풀기">
         <span class="daily-icon" id="dailyIcon">🎯</span>
         <span class="daily-text">
@@ -600,10 +638,10 @@ body {
 
     <nav class="filter-bar" id="typeFilters" aria-label="종목 필터">
       <span class="filter-label">종목</span>
-      <button type="button" class="filter-chip active" data-type="all">전체 30</button>
-      <button type="button" class="filter-chip" data-type="go">⚫ 바둑 10</button>
-      <button type="button" class="filter-chip" data-type="chess">♟️ 체스 10</button>
-      <button type="button" class="filter-chip" data-type="janggi">🏮 장기 10</button>
+      <button type="button" class="filter-chip active" data-type="all">전체 45</button>
+      <button type="button" class="filter-chip" data-type="go">⚫ 바둑 15</button>
+      <button type="button" class="filter-chip" data-type="chess">♟️ 체스 15</button>
+      <button type="button" class="filter-chip" data-type="janggi">🏮 장기 15</button>
     </nav>
 
     <a class="web-card" href="./go-practice/">
@@ -646,7 +684,7 @@ body {
       <button type="button" class="filter-chip" data-diff="고급">고급</button>
     </nav>
 
-    <p class="progress-line">푼 문제 <b id="solvedCount">0</b> / <span id="totalCount">30</span></p>
+    <p class="progress-line">푼 문제 <b id="solvedCount">0</b> / <span id="totalCount">45</span></p>
 
     <div class="puzzle-tabs" id="puzzleTabs" role="tablist" aria-label="문제 선택"></div>
 
@@ -654,7 +692,7 @@ body {
       <div class="puzzle-meta">
         <span class="type-pill" id="puzzleTypePill">바둑 9×9</span>
         <span class="diff-pill mid" id="puzzleDiffPill">입문</span>
-        <span class="counter-text" id="puzzleCounter">1 / 20</span>
+        <span class="counter-text" id="puzzleCounter">1 / 45</span>
       </div>
 
       <h2 class="puzzle-title" id="puzzleTitle">문제 로딩 중…</h2>
@@ -671,9 +709,14 @@ body {
 
       <div class="feedback-box" id="feedbackBox" role="region" aria-label="정오답 및 해설">
         <strong id="feedbackStatus"></strong>
+        <p class="feedback-why" id="feedbackWhy" hidden></p>
         <p id="feedbackText"></p>
         <div class="feedback-answer" id="feedbackAnswer"></div>
         <div class="feedback-source" id="feedbackSource"></div>
+        <div class="feedback-actions" id="feedbackActions" hidden>
+          <button type="button" class="fb-primary" id="fbRetryBtn">🔄 바로 다시</button>
+          <button type="button" id="fbHintBtn">💡 힌트 보기</button>
+        </div>
       </div>
 
       <div class="action-row">
@@ -754,6 +797,7 @@ let diffFilter = 'all';
 let list = [];
 let idx = 0;
 let played = null;      // 정답/오답 처리 후의 보드 상태
+let wrongTries = 0;     // 이 문항에서 틀린 횟수(2회째에 정답·해설 공개)
 let hintShown = false;
 let soundEnabled = true;
 let audioCtx = null;
@@ -835,6 +879,7 @@ function applyFilter() {
   if (!list.length) { list = miniPuzzles.slice(); }
   idx = 0;
   played = null;
+  wrongTries = 0;
   janggiSel = null;
   janggiTargets = [];
   hintShown = false;
@@ -853,6 +898,7 @@ function selectGlobal(gi) {
   syncChips();
   idx = gi;
   played = null;
+  wrongTries = 0;
   janggiSel = null;
   janggiTargets = [];
   hintShown = false;
@@ -1646,21 +1692,190 @@ function renderBoardOnly() {
   else wrap.appendChild(renderJanggiBoard(p));
 }
 
-function renderFeedback(p, isCorrect) {
+function setFeedbackBox(opt) {
   const box = document.getElementById('feedbackBox');
   if (!box) return;
-  box.className = 'feedback-box show ' + (isCorrect ? 'ok' : 'ng');
+  box.className = 'feedback-box show ' + (opt.ok ? 'ok' : 'ng');
   const status = document.getElementById('feedbackStatus');
-  const text = document.getElementById('feedbackText');
-  const ans = document.getElementById('feedbackAnswer');
-  const src = document.getElementById('feedbackSource');
   if (status) {
-    status.textContent = isCorrect ? '✅ 정답입니다! 완벽한 한 수예요.' : '❌ 아쉽습니다! 아래 해설을 확인하고 다시 도전해 보세요.';
-    status.style.color = isCorrect ? 'var(--correct)' : 'var(--wrong)';
+    status.textContent = opt.status;
+    status.style.color = opt.ok ? 'var(--correct)' : 'var(--wrong)';
   }
-  if (text) text.textContent = p.explanation;
-  if (ans) ans.textContent = '정답: ' + p.answerText;
-  if (src) src.textContent = '출처: ' + p.source;
+  const why = document.getElementById('feedbackWhy');
+  if (why) {
+    why.hidden = !opt.note;
+    why.textContent = opt.note || '';
+  }
+  const text = document.getElementById('feedbackText');
+  if (text) text.textContent = opt.text || '';
+  const ans = document.getElementById('feedbackAnswer');
+  if (ans) ans.textContent = opt.answer || '';
+  const src = document.getElementById('feedbackSource');
+  if (src) src.textContent = opt.source || '';
+  const actions = document.getElementById('feedbackActions');
+  if (actions) actions.hidden = !opt.actions;
+  const retry = document.getElementById('fbRetryBtn');
+  if (retry) retry.hidden = !opt.retry;
+  if (box.scrollIntoView) {
+    try { box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) { /* ignore */ }
+  }
+}
+
+/* ---------- 오답 이유 한 줄 ---------- */
+function goWhiteAtariGroups(map, size) {
+  const seen = new Set();
+  let n = 0;
+  map.forEach(function (col, key) {
+    if (col !== 'W' || seen.has(key)) return;
+    const parts = key.split(',');
+    const g = goGroup(map, Number(parts[0]), Number(parts[1]), size);
+    g.stones.forEach(function (s) { seen.add(goKey(s[0], s[1])); });
+    if (g.libs.size === 1) n += 1;
+  });
+  return n;
+}
+
+function goEyeCount(map, r, c, size) {
+  if (map.get(goKey(r, c)) !== 'B') return -1;
+  const g = goGroup(map, r, c, size);
+  const own = new Set(g.stones.map(function (s) { return goKey(s[0], s[1]); }));
+  const eyes = new Set();
+  g.stones.forEach(function (s) {
+    goNeighbors(s[0], s[1], size).forEach(function (n) {
+      const k = goKey(n[0], n[1]);
+      if (map.has(k)) return;
+      const allOwn = goNeighbors(n[0], n[1], size).every(function (m) { return own.has(goKey(m[0], m[1])); });
+      if (allOwn) eyes.add(k);
+    });
+  });
+  return eyes.size;
+}
+
+function goWrongNote(p, r, c) {
+  const res = goPlay(stonesToMap(p), r, c, p.playerColor || 'B', p.size);
+  if (!res.ok) {
+    return res.reason === 'suicide'
+      ? '자충수입니다. 이 자리에 두면 내 돌의 활로가 0이 되어 둘 수 없습니다.'
+      : '이미 돌이 있는 자리입니다. 빈 교차점을 골라 주세요.';
+  }
+  const nb = res.board;
+  const ck = p.check || {};
+  const kind = ck.kind || '';
+  const cap = res.captured.length;
+  if (kind === 'capture') {
+    if (!cap) return '이 수로는 백돌을 따내지 못합니다. 활로가 한 곳만 남은 백돌의 마지막 활로를 찾으세요.';
+    return '이 수로는 ' + cap + '점만 따냅니다. 더 많이 잡을 수 있는 자리가 따로 있습니다.';
+  }
+  if (kind === 'double_atari') {
+    const groups = goWhiteAtariGroups(nb, p.size);
+    if (!groups) return '이 수로는 어느 백 그룹도 단수가 되지 않습니다. 두 그룹이 함께 쓰는 활로를 찾으세요.';
+    return '단수가 된 그룹이 ' + groups + '개뿐입니다. 두 그룹을 동시에 노리는 자리가 따로 있습니다.';
+  }
+  if (kind === 'atari_dead') {
+    const t = ck.target || [];
+    if (nb.get(goKey(t[0], t[1])) !== 'W') {
+      return '이 수로는 백을 바로 들어냅니다. 하지만 다음 수에 잡도록 몰아 두는 문제입니다.';
+    }
+    const libs = goGroup(nb, t[0], t[1], p.size).libs.size;
+    if (libs >= 2) return '백의 활로가 아직 ' + libs + '개라 단수가 아닙니다. 백이 살아납니다.';
+    return '단수는 걸렸지만 백이 그 자리를 메워 살아납니다. 백이 둘 수 없는 자리로 몰아야 합니다.';
+  }
+  if (kind === 'ko') {
+    return '이 수로는 패가 만들어지지 않습니다. 따내는 동시에 내 돌도 활로가 하나만 남는 자리를 찾으세요.';
+  }
+  if (kind === 'two_eyes') {
+    const grp = ck.group || [];
+    const eyes = goEyeCount(nb, grp[0], grp[1], p.size);
+    if (eyes < 2) return '이 자리로는 진짜 집이 ' + Math.max(eyes, 0) + '개뿐입니다. 두 눈을 만들 수 있는 급소를 찾으세요.';
+  }
+  if (kind === 'kill_nakade') {
+    return '이 자리에 두어도 백이 두 눈을 만들어 살아납니다. 백 집의 한가운데를 노리세요.';
+  }
+  return '이 수로는 목표를 이루지 못합니다.';
+}
+
+function chessWrongNote(p, r, c) {
+  const w = (p.wrong || {})[r + ',' + c];
+  if (!w) {
+    const here = (p.pieces || []).filter(function (x) { return x.r === r && x.c === c; })[0];
+    if (here && here.side === 'W') return '내 기물이 있는 칸입니다. 다른 칸을 노리세요.';
+    return '그 기물로는 그 칸으로 갈 수 없습니다.';
+  }
+  if (w === 'nocheck') return '체크가 아닙니다. 흑 킹을 직접 겨누는 수를 찾으세요.';
+  if (w === 'capture') return '체크는 되지만 흑이 그 말을 잡아낼 수 있습니다.';
+  if (w === 'fork') return '체크와 동시에 목표 기물을 노리는 수가 아닙니다.';
+  if (w === 'skewer') return '킹 뒤의 기물을 노리는 수가 아닙니다.';
+  if (w.indexOf('escape:') === 0) return '체크는 되지만 흑이 ' + w.slice(7) + ' 칸으로 빠져나갑니다.';
+  if (w.indexOf('block:') === 0) return '체크는 되지만 흑이 ' + w.slice(6) + ' 칸에 막을 수 있습니다.';
+  return '이 수로는 메이트가 되지 않습니다.';
+}
+
+function jgAllLegalCount(map, side) {
+  let n = 0;
+  map.forEach(function (pc, key) {
+    if (pc.side !== side) return;
+    const parts = key.split(',');
+    n += jgLegalMovesFrom(map, [Number(parts[0]), Number(parts[1])], side).length;
+  });
+  return n;
+}
+
+function janggiWrongNote(p, from, to) {
+  const res = jgApply(janggiBaseMap(p), from, to);
+  const ck = jgFindKing(res.board, 'cho');
+  if (!jgAttacked(res.board, ck, 'han')) {
+    return '장군이 아닙니다. 초 궁을 직접 겨누는 수를 찾으세요.';
+  }
+  const n = jgAllLegalCount(res.board, 'cho');
+  if (n <= 0) return '외통처럼 보이지만 정답은 다른 수입니다.';
+  return '장군은 걸렸지만 초가 ' + n + '가지 수로 빠져나갑니다. 도피로를 미리 막아야 합니다.';
+}
+
+function wrongNoteFor(p, mv) {
+  if (p.type === 'go') return goWrongNote(p, mv.r, mv.c);
+  if (p.type === 'chess') return chessWrongNote(p, mv.r, mv.c);
+  return janggiWrongNote(p, mv.from, [mv.r, mv.c]);
+}
+
+function renderFeedback(p, isCorrect, note) {
+  const reveal = isCorrect || wrongTries >= 2;
+  if (isCorrect) {
+    setFeedbackBox({
+      ok: true,
+      status: '✅ 정답입니다! 완벽한 한 수예요.',
+      note: '',
+      text: p.explanation,
+      answer: '정답: ' + p.answerText,
+      source: '출처: ' + p.source,
+      actions: false,
+      retry: false
+    });
+    return;
+  }
+  setFeedbackBox({
+    ok: false,
+    status: '❌ 아쉽습니다 — 그 수로는 목표에 닿지 않습니다.',
+    note: note || '',
+    text: reveal ? '두 번째 시도도 아쉬웠습니다. 아래 해설에서 정답을 확인해 보세요.'
+                 : '왜 안 되는지 확인하고 바로 다시 두거나, 힌트를 먼져 볼 수 있습니다.',
+    answer: reveal ? '정답: ' + p.answerText : '',
+    source: reveal ? '출처: ' + p.source : '',
+    actions: true,
+    retry: true
+  });
+}
+
+function showIllegalFeedback(note) {
+  setFeedbackBox({
+    ok: false,
+    status: '❌ 둘 수 없는 자리입니다.',
+    note: note || '',
+    text: '보드는 그대로 두었습니다. 다른 자리를 곱라 주세요.',
+    answer: '',
+    source: '',
+    actions: true,
+    retry: false
+  });
 }
 
 function renderPuzzle() {
@@ -1717,8 +1932,7 @@ function handleMove(r, c) {
     const base = stonesToMap(p);
     const res = goPlay(base, r, c, p.playerColor || 'B', p.size);
     if (!res.ok) {
-      if (res.reason === 'suicide') showToast('둘 수 없는 자리예요 — 자충수입니다.');
-      else showToast('이미 돌이 있는 자리예요.');
+      showIllegalFeedback(goWrongNote(p, r, c));
       playTone('ng');
       return;
     }
@@ -1730,9 +1944,10 @@ function handleMove(r, c) {
     played = { r: r, c: c, isCorrect: isCorrect, board: null };
   }
 
+  if (!isCorrect) wrongTries += 1;
   playTone(isCorrect ? 'ok' : 'ng');
   renderBoardOnly();
-  renderFeedback(p, isCorrect);
+  renderFeedback(p, isCorrect, isCorrect ? '' : wrongNoteFor(p, played));
   if (isCorrect) {
     markSolved(p.id);
     if (miniPuzzles.indexOf(p) === dailyIdx) markDailyDone(p);
@@ -1799,8 +2014,9 @@ function playJanggiMove(p, from, to) {
   if (res.captured) {
     showToast((res.captured.side === 'cho' ? '초 ' : '한 ') + (JG_NAME[res.captured.kind] || '기물') + '을 잡았습니다!');
   }
+  if (!isCorrect) wrongTries += 1;
   renderBoardOnly();
-  renderFeedback(p, isCorrect);
+  renderFeedback(p, isCorrect, isCorrect ? '' : wrongNoteFor(p, played));
   if (isCorrect) {
     markSolved(p.id);
     if (miniPuzzles.indexOf(p) === dailyIdx) markDailyDone(p);
@@ -1811,6 +2027,7 @@ function playJanggiMove(p, from, to) {
 function selectIndex(i) {
   idx = i;
   played = null;
+  wrongTries = 0;
   janggiSel = null;
   janggiTargets = [];
   hintShown = false;
@@ -1819,6 +2036,7 @@ function selectIndex(i) {
 
 function retryPuzzle() {
   played = null;
+  wrongTries = 0;
   janggiSel = null;
   janggiTargets = [];
   hintShown = false;
@@ -1828,6 +2046,7 @@ function retryPuzzle() {
 function nextPuzzle() {
   idx = (idx + 1) % list.length;
   played = null;
+  wrongTries = 0;
   janggiSel = null;
   janggiTargets = [];
   hintShown = false;
@@ -1874,6 +2093,10 @@ function init() {
   if (nextBtn) nextBtn.addEventListener('click', nextPuzzle);
   const hintBtn = document.getElementById('hintBtn');
   if (hintBtn) hintBtn.addEventListener('click', toggleHint);
+  const fbRetryBtn = document.getElementById('fbRetryBtn');
+  if (fbRetryBtn) fbRetryBtn.addEventListener('click', retryPuzzle);
+  const fbHintBtn = document.getElementById('fbHintBtn');
+  if (fbHintBtn) fbHintBtn.addEventListener('click', function () { if (!hintShown) toggleHint(); });
   const soundBtn = document.getElementById('soundToggleBtn');
   if (soundBtn) {
     soundBtn.addEventListener('click', function () {
@@ -1895,12 +2118,24 @@ function init() {
   const info = kstDateKey();
   dailyIdx = info.dayNumber % miniPuzzles.length;
   list = miniPuzzles.slice();
+  refreshFilterCounts();
   const hashed = indexFromHash();
   idx = hashed >= 0 ? hashed : dailyIdx;
   renderAll();
   fitCoupangBanner();
   [400, 1200, 2600, 4200].forEach(function (t) { window.setTimeout(fitCoupangBanner, t); });
   window.addEventListener('resize', fitCoupangBanner);
+}
+
+function refreshFilterCounts() {
+  const counts = { all: miniPuzzles.length, go: 0, chess: 0, janggi: 0 };
+  miniPuzzles.forEach(function (p) { counts[p.type] = (counts[p.type] || 0) + 1; });
+  const labels = { all: '전체 ', go: '⚫ 바둑 ', chess: '♟️ 체스 ', janggi: '🏮 장기 ' };
+  document.querySelectorAll('#typeFilters .filter-chip').forEach(function (b) {
+    const t = b.getAttribute('data-type');
+    if (labels[t] === undefined) return;
+    b.textContent = labels[t] + counts[t];
+  });
 }
 
 function fitCoupangBanner() {

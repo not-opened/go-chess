@@ -1,15 +1,15 @@
 # tools — 문항 검산·생성 도구
 
-이 폴더는 `index.html` 에 들어가는 30문항(바둑 10 · 체스 10 · 장기 10)과 그 검산을 재현하기 위한 도구입니다.
+이 폴더는 `index.html` 에 들어가는 45문항(바둑 15 · 체스 15 · 장기 15)과 그 검산을 재현하기 위한 도구입니다.
 사이트 동작에는 영향이 없습니다(정적 파일).
 
 | 파일 | 역할 |
 | --- | --- |
-| `puzzle_data.py` | 30문항 원본(바둑 10 · 체스 10 · 장기 10). 제목·문제·힌트·해설·시작 배치·정답·검산 스펙 |
+| `puzzle_data.py` | 45문항 원본(바둑 15 · 체스 15 · 장기 15). 제목·문제·힌트·해설·시작 배치·정답·검산 스펙. 체스는 오답 칸별 이유 코드(`wrong`)도 만든다 |
 | `goban.py` | 9×9 바둑 규칙 엔진(활로·따내기·자충수·집/눈) |
 | `predicates.py` | 바둑 검산 프리디케이트(따내기/양단수/단수 후 사망/패/두 눈) |
 | `janggi.py` | 9×10 한국 장기 규칙 엔진(차·포·마·상·사·궁·졸병, 멱 막힘, 포의 넘기/잡기 제한, 궁성 대각선, 빅장, 자살수) |
-| `verify_puzzles.py` | 30문항 전수 검산. `index.html` 에 박힌 JSON 을 읽어 규칙 검증 |
+| `verify_puzzles.py` | 45문항 전수 검산. `index.html` 에 박힌 JSON 을 읽어 규칙 검증(체스 오답 이유 맵 누락도 확인) |
 | `render_puzzles.py` | `site_template.html` + `puzzle_data.py` → `index.html` 생성 |
 | `site_template.html` | 화면 템플릿(`__PUZZLES_JSON__` 자리에 문항 JSON 삽입) |
 | `mobile_check.py` | Playwright 모바일 검증(탭·필터·힌트·정오답·장기 착수·공유·공유·가로 넘침·콘솔 에러) |
@@ -23,7 +23,7 @@
 ```bash
 pip install python-chess playwright
 python3 tools/render_puzzles.py     # 템플릿 + 데이터 → index.html
-python3 tools/verify_puzzles.py     # 30문항 검산 (index.html 기준)
+python3 tools/verify_puzzles.py     # 45문항 검산 (index.html 기준)
 python3 tools/verify_puzzles.py --data   # 데이터 원본만 검산
 python3 tools/export_janggi_legal.py     # 장기 합법수 기대값 갱신
 python3 tools/mobile_check.py --url http://127.0.0.1:8777/

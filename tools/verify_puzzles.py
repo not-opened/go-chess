@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""20문항 전체 검산 스크립트.
+"""45문항 전체 검산 스크립트.
 
 사용:
     python3 verify_puzzles.py            # index.html 에 박힌 JSON 을 검산
@@ -188,6 +188,19 @@ def verify_chess(p):
     assert len(movers) == 1, f"{p['id']}: mover 기물 {len(movers)}개"
     assert sq(movers[0]["r"], movers[0]["c"]) == mv.from_square, f"{p['id']}: mover 위치가 출발칸과 다름"
 
+    # 오답 이유 맵: 정답을 뺀 모든 합법 수 도착칸에 이유가 있어야 한다
+    wrong = p.get("wrong") or {}
+    assert isinstance(wrong, dict) and wrong, f"{p['id']}: 오답 이유 맵 없음"
+    for m in b.legal_moves:
+        if m.from_square != mv.from_square:
+            continue
+        rr = 7 - chess.square_rank(m.to_square)
+        cc = chess.square_file(m.to_square)
+        if (rr, cc) == ans:
+            assert f"{rr},{cc}" not in wrong, f"{p['id']}: 정답 칸에 오답 이유가 있음"
+            continue
+        assert f"{rr},{cc}" in wrong, f"{p['id']}: 오답 이유 누락 {chess.square_name(m.to_square)}"
+
     kind = p["check"]["kind"]
     if kind == "mate":
         mates = mate_moves(b)
@@ -224,7 +237,7 @@ def verify_chess(p):
             defenders_value = chess.QUEEN
             captured = nb2.piece_at(target)
             assert caps, "no capture"
-        detail = f"고유 체크+공격 수, 흑 응수 {len(list(nb.legal_moves))}가지 모두 퀸 획득"
+        detail = f"고유 체크+공격 수, 흑 응수 {len(list(nb.legal_moves))}가지 모두 목표 기물 획득"
     elif kind == "skewer":
         target = chess.parse_square(p["check"]["target"])
         def skewerish(m):
@@ -350,11 +363,11 @@ def main():
     else:
         puzzles = load_from_index(os.path.join(ROOT, "index.html"))
 
-    assert len(puzzles) == 30, f"문항 수 {len(puzzles)} (30 기대)"
+    assert len(puzzles) == 45, f"문항 수 {len(puzzles)} (45 기대)"
     ids = [p["id"] for p in puzzles]
     assert len(set(ids)) == len(ids), "중복 id"
     for typ, label in (("go", "바둑"), ("chess", "체스"), ("janggi", "장기")):
-        assert sum(1 for p in puzzles if p["type"] == typ) == 10, f"{label} 10문항 아님"
+        assert sum(1 for p in puzzles if p["type"] == typ) == 15, f"{label} 15문항 아님"
     for p in puzzles:
         assert p["difficulty"] in ("입문", "중급", "고급"), f"{p['id']}: 난이도 {p['difficulty']}"
         for key in ("title", "prompt", "hint", "explanation", "source", "answerText"):
