@@ -761,6 +761,7 @@ body {
 
       <button type="button" class="hint-btn" id="hintBtn" aria-expanded="false" aria-controls="hintBox">💡 힌트 보기</button>
       <div class="hint-box" id="hintBox" hidden></div>
+      <button type="button" class="hint-btn" id="solutionBtn" hidden style="margin-top:6px;">🔁 정답 수로 복기하기</button>
 
       <div class="feedback-box" id="feedbackBox" role="region" aria-label="정오답 및 해설">
         <strong id="feedbackStatus"></strong>
@@ -2099,6 +2100,8 @@ function renderFeedback(p, isCorrect, note) {
   const reveal = isCorrect || wrongTries >= 2;
   if (isCorrect) {
     hubReview?.complete(p);
+    const sb = document.getElementById('solutionBtn');
+    if (sb) sb.hidden = false;
     setFeedbackBox({
       ok: true,
       status: '✅ 정답입니다! 완벽한 한 수예요.',
@@ -2170,6 +2173,11 @@ function renderPuzzle() {
   }
   if (card) card.classList.toggle('is-daily', miniPuzzles.indexOf(p) === dailyIdx);
   if (!(hubReview && hubReview.active)) safeSet(STORE_LAST, p.id);
+  const solutionBtn = document.getElementById('solutionBtn');
+  if (solutionBtn) {
+    const isSolved = solvedIds().indexOf(p.id) !== -1;
+    solutionBtn.hidden = !(isSolved && !played);
+  }
 
   renderTabs();
   renderBoardOnly();
@@ -2349,6 +2357,38 @@ function toggleHint() {
   }
 }
 
+/* 이미 푼 문제를 정답 수로 되짚어 보는 복기 모드 */
+function showSolution() {
+  const p = current();
+  if (!p) return;
+  if (p.type === 'go') {
+    const res = goPlay(stonesToMap(p), p.answer.r, p.answer.c, p.playerColor || 'B', p.size);
+    if (!res.ok) { showToast('이 문제는 복기 화면을 만들 수 없어요.'); return; }
+    played = { r: p.answer.r, c: p.answer.c, isCorrect: true, board: res.board };
+  } else if (p.type === 'chess') {
+    played = { r: p.answer.r, c: p.answer.c, isCorrect: true, board: null };
+  } else {
+    const f = p.answer.from, t = p.answer.to;
+    const res = jgApply(janggiBaseMap(p), [f.r, f.c], [t.r, t.c]);
+    played = { r: t.r, c: t.c, from: [f.r, f.c], isCorrect: true, board: res.board };
+  }
+  janggiSel = null;
+  janggiTargets = [];
+  const sb = document.getElementById('solutionBtn');
+  if (sb) sb.hidden = true;
+  renderBoardOnly();
+  setFeedbackBox({
+    ok: true,
+    status: '🔁 정답 수 복기 — 보드에서 정답 수를 표시했습니다.',
+    note: '',
+    text: p.explanation,
+    answer: '정답: ' + p.answerText,
+    source: '출처: ' + p.source,
+    actions: false,
+    retry: true
+  });
+}
+
 function startHubReview() {
   hubPrevious = { typeFilter, diffFilter, puzzle: current() };
   list = hubReview.pending();
@@ -2396,6 +2436,8 @@ function init() {
   if (nextBtn) nextBtn.addEventListener('click', nextPuzzle);
   const hintBtn = document.getElementById('hintBtn');
   if (hintBtn) hintBtn.addEventListener('click', toggleHint);
+  const solutionBtn = document.getElementById('solutionBtn');
+  if (solutionBtn) solutionBtn.addEventListener('click', showSolution);
   const fbRetryBtn = document.getElementById('fbRetryBtn');
   if (fbRetryBtn) fbRetryBtn.addEventListener('click', retryPuzzle);
   const fbHintBtn = document.getElementById('fbHintBtn');
