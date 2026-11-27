@@ -103,7 +103,7 @@ function renderSteps() {
   if (!steps.children.length) lessons.forEach((p,i) => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.addEventListener('click', () => openLesson(i,true));
+    b.addEventListener('click', () => { review.leave(false); openLesson(i,true); });
     steps.append(b);
   });
   [...steps.children].forEach((b,i) => {
@@ -119,11 +119,12 @@ function openLesson(i, focusTitle = false) {
   selected = finishedMove = false;
   miss = -1;
   const p = lessons[i];
+  review.resetNotes();
   $('finish').hidden = true;
   $('lesson').hidden = false;
   $('title').textContent = (index+1) + '수. ' + p.title;
   $('prompt').textContent = p.prompt;
-  $('kicker').textContent = p.attackers ? '장군! · 한(빨강) 차례' : '한(漢) 차례 · 아래에서 위로';
+  $('kicker').textContent = (review.active?'오답 · ':'') + (p.attackers ? '장군! · 한(빨강) 차례' : '한(漢) 차례 · 아래에서 위로');
   $('retry').hidden = $('next').hidden = true;
   $('hint').hidden = false;
   $('hint-text').hidden = true;
@@ -146,6 +147,7 @@ function choose(i) {
   const p = lessons[index];
   if (i !== p.answer) {
     miss = i;
+    review.record(index,i);
     feedback(abc[i] + '로는 갈 수 없어요. 다시 골라 보세요.', p.options[i][2], 'wrong');
     renderBoard('option-' + i);
     $('response').scrollIntoView({block:'nearest'});
@@ -153,12 +155,13 @@ function choose(i) {
   }
   finishedMove = true;
   solved.add(index);
+  review.complete(index);
   renderBoard();
   renderSteps();
   feedback(p.attackers ? '멍군! 장군을 벗어났어요.' : '맞았어요!', p.rule, 'ok');
   $('hint').hidden = $('hint-text').hidden = true;
   $('retry').hidden = $('next').hidden = false;
-  $('next').textContent = solved.size === lessons.length ? '완료 보기 →' : '다음 수 →';
+  $('next').textContent = review.active ? review.nextLabel() : solved.size === lessons.length ? '완료 보기 →' : '다음 수 →';
   $('next').focus({preventScroll:true});
   $('next').scrollIntoView({block:'nearest'});
 }
@@ -171,6 +174,7 @@ $('hint').addEventListener('click', () => {
 });
 $('retry').addEventListener('click', () => openLesson(index,true));
 $('next').addEventListener('click', () => {
+  if (review.next()) return;
   if (solved.size === lessons.length) {
     $('lesson').hidden = true;
     $('finish').hidden = false;
@@ -185,6 +189,7 @@ $('again').addEventListener('click', () => {
   solved.clear();
   openLesson(0,true);
 });
+const review=createMistakeReview({course:lessons[0].attackers?'janggi-defense':'janggi-beginner',lessons,getIndex:()=>index,open:openLesson});
 // A Shorts viewer can open the exact practice position without seeing its answer.
 const requestedStep = Number(new URLSearchParams(location.search).get('step'));
 openLesson(Number.isInteger(requestedStep) && requestedStep>=1 && requestedStep<=lessons.length ? requestedStep-1 : 0);

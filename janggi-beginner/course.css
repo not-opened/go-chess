@@ -62,3 +62,11 @@ footer { color: var(--muted); font-size: .82rem; margin-top: 16px; }
 @media (max-width: 620px) { .playing { grid-template-columns: minmax(0, 1fr); gap: 8px; } .board { max-width: 390px; margin-inline: auto; } }
 
 .token.threat { box-shadow: 0 0 0 3px #a84b0b, 0 0 0 5px #ffce7b; }
+
+.mistake-box { display: flex; align-items: center; gap: .5rem .75rem; flex-wrap: wrap; padding: .6rem; margin: .5rem 0 .8rem; border: 1px solid var(--line); border-radius: 10px; background: #faf8ef; }
+.mistake-box p { margin: 0; color: var(--muted); font-size: .83rem; flex: 1 1 12rem; }
+.mistake-box button:disabled { color: var(--muted); opacity: .8; cursor: default; }
+.mistake-notes { margin: .55rem 0; padding: .45rem .65rem; border: 1px solid var(--line); border-radius: 8px; font-size: .87rem; }
+.mistake-notes summary { color: var(--green); font-weight: 700; padding: .3rem 0; cursor: pointer; }
+.mistake-notes ul { margin: .35rem 0; padding-left: 1.15rem; }
+.mistake-notes li + li { margin-top: .3rem; }
