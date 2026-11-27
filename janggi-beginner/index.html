@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>장기 입문 5수 | notopened</title>
+<meta name="description" content="장기판에서 직접 한 수를 두며 포, 마, 차, 졸과 병의 기본 이동 규칙을 배우는 무료 장기 입문 코스. 다섯 문제와 힌트, 자세한 해설.">
+<link rel="canonical" href="https://notopened.com/go-chess/janggi-beginner/">
+<meta name="theme-color" content="#f2efe6">
+<link rel="stylesheet" href="course.css">
+<script defer src="course.js"></script>
+</head>
+<body>
+<main>
+  <a class="back" href="../">← 기존 한 수 퍼즐</a>
+  <header class="intro">
+    <p class="eyebrow">NOTOPENED · 장기 연습장</p>
+    <h1>장기 입문 5수</h1>
+    <p>말의 이름을 다 몰라도 괜찮아요.<br>장기판에서 직접 한 수를 두며 규칙을 익혀요.</p>
+  </header>
+  <div class="progress"><strong id="progress">0 / 5수 완료</strong><progress value="0" max="5" aria-label="완료한 문제 수"></progress></div>
+  <nav id="steps" aria-label="연습 문제 선택"></nav>
+  <section id="lesson" class="lesson" aria-labelledby="title">
+    <div class="lesson-head">
+      <p id="kicker" class="eyebrow">한(漢) 차례 · 아래에서 위로</p>
+      <h2 id="title" tabindex="-1">1수. 포는 무엇을 넘을 수 있을까?</h2>
+      <p id="prompt">움직일 말을 먼저 누르고, 도착점 A·B·C 중 한 곳을 골라 보세요.</p>
+    </div>
+    <div class="playing">
+      <div>
+        <div id="board" class="board" role="group" aria-label="장기 연습판"></div>
+        <p class="legend"><b>한(나) ↑</b><b>초(상대) ↓</b><span>선이 만나는 점에 둬요.</span></p>
+      </div>
+      <div class="panel">
+        <div class="response" id="response" role="status" aria-atomic="true">
+          <strong id="status"></strong><p id="detail"></p>
+        </div>
+        <button type="button" class="hint" id="hint" aria-expanded="false" aria-controls="hint-text">힌트 보기</button>
+        <p id="hint-text" hidden></p>
+        <div class="actions">
+          <button type="button" id="retry" class="retry" hidden>이 수 다시 두기</button>
+          <button type="button" id="next" class="next" hidden>다음 수 →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="finish" id="finish" aria-labelledby="finish-title" hidden>
+    <p class="eyebrow">5 / 5수 완료</p>
+    <h2 id="finish-title" tabindex="-1">이제 장기판에서 길이 보이겠네요!</h2>
+    <ul>
+      <li><strong>포</strong>는 포가 아닌 말 하나를 넘어야 하고, 포를 잡을 수 없어요.</li>
+      <li><strong>마</strong>는 바로 옆 첫 길목이 막히면 그 방향으로 갈 수 없어요.</li>
+      <li><strong>차</strong>는 가로·세로로 다니고, 궁성에 그어진 대각선도 탈 수 있어요.</li>
+      <li><strong>졸과 병</strong>은 앞으로나 옆으로 한 칸. 뒤로는 못 가요.</li>
+    </ul>
+    <div class="actions"><button class="retry" type="button" id="again">처음부터 다시</button><a class="next" href="../#janggi-01">장기 한 수 퍼즐 →</a></div>
+  </section>
+  <noscript><p>장기판을 움직이려면 브라우저에서 자바스크립트를 켜 주세요.</p></noscript>
+  <footer>이동 규칙 참고: <a href="https://koreajanggi.cafe24.com/business/business6.php">대한장기협회 기물 행마법</a><br>기본 이동을 연습하기 위해 말 몇 개만 놓았습니다.</footer>
+</main>
+</body>
+</html>
