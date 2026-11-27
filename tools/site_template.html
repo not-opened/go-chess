@@ -1924,8 +1924,7 @@ function copyText(value) {
   return Promise.resolve(legacyCopy(value));
 }
 
-function shareResult() {
-  const pack = resultSharePayload();
+function shareResultText(pack) {
   const combined = pack.text + '\n' + pack.url;
   function done(ok) {
     showToast(ok ? '결과와 링크를 복사했습니다.' : '공유 문구를 길게 눌러 복사해 주세요.');
@@ -1940,6 +1939,225 @@ function shareResult() {
     return;
   }
   copyText(combined).then(done);
+}
+
+function canShareImageFile() {
+  if (typeof navigator.canShare !== 'function' || typeof File === 'undefined') return false;
+  try {
+    return navigator.canShare({ files: [new File(['x'], 'probe.png', { type: 'image/png' })] });
+  } catch (e) {
+    return false;
+  }
+}
+
+function roundRectPath(ctx, x, y, w, h, r) {
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+function shareCanvasFont(weight, size) {
+  return weight + ' ' + size + 'px "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "WenQuanYi Micro Hei", sans-serif';
+}
+
+function shareStateLabel() {
+  if (played && played.isCorrect) return { label: '정답', color: '#22c55e' };
+  if (played) return { label: '오답', color: '#ef4444' };
+  return { label: '도전 중', color: '#facc15' };
+}
+
+function wrapShareText(ctx, text, maxWidth) {
+  const chars = Array.from(String(text || ''));
+  const lines = [];
+  let line = '';
+  chars.forEach(function (ch) {
+    const next = line + ch;
+    if (line && ctx.measureText(next).width > maxWidth) {
+      lines.push(line);
+      line = ch;
+    } else {
+      line = next;
+    }
+  });
+  if (line) lines.push(line);
+  return lines.slice(0, 3);
+}
+
+function drawPlayLogo(ctx, x, y, size) {
+  roundRectPath(ctx, x, y, size, size, size * 8 / 32);
+  ctx.fillStyle = '#facc15';
+  ctx.fill();
+  const s = size / 32;
+  ctx.beginPath();
+  ctx.moveTo(x + 13 * s, y + 9 * s);
+  ctx.lineTo(x + 13 * s, y + 23 * s);
+  ctx.lineTo(x + 24 * s, y + 16 * s);
+  ctx.closePath();
+  ctx.fillStyle = '#0b1220';
+  ctx.fill();
+}
+
+function loadBoardImage() {
+  const svg = document.querySelector('#boardWrap svg');
+  if (!svg) return Promise.resolve(null);
+  const clone = svg.cloneNode(true);
+  clone.querySelectorAll('.board-hit').forEach(function (node) {
+    if (node.parentNode) node.parentNode.removeChild(node);
+  });
+  const vb = (clone.getAttribute('viewBox') || '0 0 600 600').trim().split(/[\s,]+/).map(Number);
+  const w = vb[2] || 600;
+  const h = vb[3] || 600;
+  const scale = 3;
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width', String(Math.round(w * scale)));
+  clone.setAttribute('height', String(Math.round(h * scale)));
+  let xml = '';
+  try { xml = new XMLSerializer().serializeToString(clone); } catch (e) { return Promise.resolve(null); }
+  const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  return new Promise(function (resolve) {
+    const img = new Image();
+    img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = function () { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
+function buildShareImage() {
+  return loadBoardImage().then(function (boardImg) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1350;
+    const ctx = canvas.getContext('2d');
+    const p = current();
+    const state = shareStateLabel();
+    const left = 72;
+
+    ctx.fillStyle = '#0b1220';
+    ctx.fillRect(0, 0, 1080, 1350);
+    const glow = ctx.createRadialGradient(540, 0, 40, 540, 0, 720);
+    glow.addColorStop(0, 'rgba(56, 80, 140, 0.45)');
+    glow.addColorStop(1, 'rgba(56, 80, 140, 0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, 1080, 560);
+
+    const logo = 72;
+    drawPlayLogo(ctx, left, 72, logo);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = shareCanvasFont(700, 46);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('notopened', left + logo + 20, 72 + logo / 2);
+
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = shareCanvasFont(700, 56);
+    ctx.fillText('바둑·체스·장기 한 수', left, 180);
+
+    let y = 264;
+    ctx.font = shareCanvasFont(700, 40);
+    ctx.fillStyle = '#e2e8f0';
+    wrapShareText(ctx, p ? p.title : '한 수 미니', 1080 - left * 2).forEach(function (line) {
+      ctx.fillText(line, left, y);
+      y += 52;
+    });
+
+    const level = p ? p.difficulty : '';
+    if (level) {
+      y += 6;
+      ctx.font = shareCanvasFont(700, 28);
+      const tw = ctx.measureText(level).width;
+      const pw = tw + 36;
+      const ph = 48;
+      const levelColor = level === '입문' ? '#34d399' : (level === '고급' ? '#f472b6' : '#fbbf24');
+      roundRectPath(ctx, left, y, pw, ph, 24);
+      ctx.fillStyle = 'rgba(248, 250, 252, 0.06)';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = levelColor;
+      ctx.stroke();
+      ctx.fillStyle = levelColor;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(level, left + 18, y + ph / 2 + 1);
+      ctx.textBaseline = 'top';
+      y += ph;
+    }
+
+    y += 28;
+    ctx.font = shareCanvasFont(700, 64);
+    ctx.fillStyle = state.color;
+    ctx.fillText(state.label, left, y);
+    y += 88;
+
+    const footerTop = 1350 - 96;
+    const boardTop = y + 8;
+    const boardMaxH = footerTop - 28 - boardTop;
+    if (boardImg && boardMaxH > 120) {
+      const maxW = 1080 - left * 2;
+      const ratio = boardImg.width / boardImg.height || 1;
+      let dw = maxW;
+      let dh = dw / ratio;
+      if (dh > boardMaxH) {
+        dh = boardMaxH;
+        dw = dh * ratio;
+      }
+      const bx = (1080 - dw) / 2;
+      const by = boardTop + Math.max(0, (boardMaxH - dh) / 2);
+      ctx.save();
+      roundRectPath(ctx, bx, by, dw, dh, 28);
+      ctx.clip();
+      ctx.drawImage(boardImg, bx, by, dw, dh);
+      ctx.restore();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(248, 250, 252, 0.18)';
+      roundRectPath(ctx, bx, by, dw, dh, 28);
+      ctx.stroke();
+    }
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = shareCanvasFont(600, 28);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('notopened.com/go-chess', 540, 1350 - 52);
+
+    return new Promise(function (resolve) {
+      canvas.toBlob(function (blob) { resolve(blob); }, 'image/png');
+    });
+  });
+}
+
+function shareResult() {
+  const pack = resultSharePayload();
+  if (!canShareImageFile()) {
+    shareResultText(pack);
+    return;
+  }
+  buildShareImage().then(function (blob) {
+    if (!blob) { shareResultText(pack); return; }
+    let file;
+    try {
+      file = new File([blob], 'notopened-go-chess.png', { type: 'image/png' });
+    } catch (e) {
+      shareResultText(pack);
+      return;
+    }
+    if (!navigator.canShare({ files: [file] })) {
+      shareResultText(pack);
+      return;
+    }
+    navigator.share({ files: [file], title: pack.title, text: pack.text, url: pack.url }).then(function () {
+      showToast('결과를 공유했습니다.');
+    }).catch(function (err) {
+      if (err && err.name === 'AbortError') return;
+      shareResultText(pack);
+    });
+  }).catch(function () {
+    shareResultText(pack);
+  });
 }
 
 if (typeof window !== 'undefined') {
