@@ -236,6 +236,20 @@ body {
   min-width: 0;
 }
 .streak-stat b { color: #f8fafc; }
+.streak-share {
+  margin-left: auto;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  background: rgba(56, 189, 248, 0.12);
+  color: #bae6fd;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  min-height: 32px;
+}
+.streak-share[hidden] { display: none; }
+.streak-share:active { transform: scale(0.98); }
 
 .filter-bar {
   display: flex;
@@ -682,6 +696,7 @@ body {
       <div class="streak-row" id="streakRow" aria-live="polite">
         <span class="streak-badge" id="streakBadge">🌱 입문자</span>
         <span class="streak-stat" id="streakStat">연속 0일 · 오늘의 한 수 0개 해결</span>
+        <button type="button" class="streak-share" id="streakShareBtn" hidden>📤 오늘 기록 공유</button>
       </div>
     </header>
 
@@ -1011,6 +1026,8 @@ function renderStreak(info) {
   const doneToday = !!(doneMap && typeof doneMap === 'object' && doneMap[info.key]);
   const tomorrowText = doneToday ? ' · 내일 0시 새 한 수' : '';
   stat.innerHTML = '연속 <b>' + days + '일</b> · 오늘의 한 수 <b>' + solvedDays + '개</b> 해결' + nextText + tomorrowText;
+  const shareBtn = document.getElementById('streakShareBtn');
+  if (shareBtn) shareBtn.hidden = !doneToday;
 }
 
 /* ---------- 필터/목록 ---------- */
@@ -2342,6 +2359,21 @@ function nextPuzzle() {
   }
 }
 
+function shareDailyResult() {
+  const info = kstDateKey();
+  const map = safeGet(STORE_DAILY, {}) || {};
+  const id = map[info.key];
+  const p = miniPuzzles.find(function (x) { return x.id === id; });
+  if (!p) { showToast('오늘의 한 수를 먼저 풀어 주세요.'); return; }
+  const st = loadStreak();
+  const days = effectiveStreak(st, info);
+  const t = titleFor(days);
+  const text = '[notopened 한 수] ' + info.label + ' 오늘의 한 수 — ' + typeName(p) + ' ' + typeNo(p) + '번 해결!'
+    + '\n연속 ' + days + '일 · ' + t.icon + ' ' + t.name
+    + '\n하루 한 수로 두뇌를 깨우세요. #notopened #바둑 #체스 #장기';
+  shareResultText({ title: 'notopened 오늘의 한 수', text: text, url: SITE_URL });
+}
+
 function toggleHint() {
   hintShown = !hintShown;
   const p = current();
@@ -2438,6 +2470,8 @@ function init() {
   if (hintBtn) hintBtn.addEventListener('click', toggleHint);
   const solutionBtn = document.getElementById('solutionBtn');
   if (solutionBtn) solutionBtn.addEventListener('click', showSolution);
+  const streakShareBtn = document.getElementById('streakShareBtn');
+  if (streakShareBtn) streakShareBtn.addEventListener('click', shareDailyResult);
   const fbRetryBtn = document.getElementById('fbRetryBtn');
   if (fbRetryBtn) fbRetryBtn.addEventListener('click', retryPuzzle);
   const fbHintBtn = document.getElementById('fbHintBtn');
