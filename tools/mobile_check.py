@@ -232,6 +232,7 @@ def run(url, shot_prefix, out_json, vw, vh):
         page.locator("#hintBtn").click()
         page.wait_for_timeout(120)
         check("바둑 힌트", len(page.locator("#hintBox").inner_text()) > 8)
+        check("바둑에는 장기 범례 숨김", page.locator("#janggiLegend").is_hidden())
         page.locator("#hintBtn").click()
         page.locator('[data-row="0"][data-col="0"]').click(force=True)
         page.wait_for_timeout(200)
