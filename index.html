@@ -480,9 +480,17 @@ body {
 .music-link .name { min-width: 0; }
 .music-link .go { font-size: 0.76rem; color: var(--accent); font-weight: 800; flex: 0 0 auto; white-space: nowrap; }
 
-.btn-share {
-  width: 100%;
+.share-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
   margin-top: 8px;
+}
+.btn-share {
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-top: 0;
   padding: 12px 10px;
   border-radius: 10px;
   font-size: 0.85rem;
@@ -493,6 +501,13 @@ body {
   background: var(--surface-sub);
   color: var(--text-main);
   font-family: inherit;
+  white-space: nowrap;
+}
+.btn-share-link {
+  flex: 0 0 auto;
+  padding: 12px 14px;
+  color: var(--accent);
+  background: transparent;
 }
 
 .affiliate-section { margin-bottom: 16px; }
@@ -633,7 +648,10 @@ body {
         <button type="button" class="btn-secondary" id="retryBtn">🔄 다시 도전</button>
         <button type="button" class="btn-primary" id="nextBtn">➡️ 다음 문제</button>
       </div>
-      <button type="button" class="btn-share" id="shareBtn">결과 공유하기</button>
+      <div class="share-row">
+        <button type="button" class="btn-share" id="shareBtn">결과 공유하기</button>
+        <button type="button" class="btn-share btn-share-link" id="shareLinkBtn">링크 공유</button>
+      </div>
     </section>
 
     <section class="affiliate-section" id="affiliateSection" aria-label="쿠팡 파트너스 추천 상품" hidden>
@@ -1840,6 +1858,8 @@ function init() {
   }
   const shareBtn = document.getElementById('shareBtn');
   if (shareBtn) shareBtn.addEventListener('click', shareResult);
+  const shareLinkBtn = document.getElementById('shareLinkBtn');
+  if (shareLinkBtn) shareLinkBtn.addEventListener('click', function () { shareResultText(resultSharePayload()); });
   const info = kstDateKey();
   dailyIdx = info.dayNumber % miniPuzzles.length;
   list = miniPuzzles.slice();
@@ -1922,6 +1942,13 @@ function copyText(value) {
     return navigator.clipboard.writeText(value).then(function () { return true; }, function () { return legacyCopy(value); });
   }
   return Promise.resolve(legacyCopy(value));
+}
+
+function copyShareQuiet(value) {
+  try {
+    if (!navigator.clipboard || !navigator.clipboard.writeText) return;
+    navigator.clipboard.writeText(value).then(function () {}, function () {});
+  } catch (e) { /* ignore */ }
 }
 
 function shareResultText(pack) {
@@ -2149,10 +2176,14 @@ function shareResult() {
       shareResultText(pack);
       return;
     }
+    copyShareQuiet(pack.text + '\n' + pack.url);
     navigator.share({ files: [file], title: pack.title, text: pack.text, url: pack.url }).then(function () {
-      showToast('결과를 공유했습니다.');
+      showToast('링크가 복사됐어요. 카톡에 붙여넣기 해주세요');
     }).catch(function (err) {
-      if (err && err.name === 'AbortError') return;
+      if (err && err.name === 'AbortError') {
+        showToast('링크가 복사됐어요. 카톡에 붙여넣기 해주세요');
+        return;
+      }
       shareResultText(pack);
     });
   }).catch(function () {
