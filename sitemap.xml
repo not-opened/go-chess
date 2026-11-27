@@ -14,4 +14,8 @@
     <loc>https://notopened.com/go-chess/janggi-beginner/</loc>
     <changefreq>monthly</changefreq>
   </url>
+  <url>
+    <loc>https://notopened.com/go-chess/janggi-defense/</loc>
+    <changefreq>monthly</changefreq>
+  </url>
 </urlset>

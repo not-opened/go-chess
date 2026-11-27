@@ -60,3 +60,5 @@ button:disabled { cursor: default; }
 .finish ul { padding-left: 1.3rem; }
 footer { color: var(--muted); font-size: .82rem; margin-top: 16px; }
 @media (max-width: 620px) { .playing { grid-template-columns: minmax(0, 1fr); gap: 8px; } .board { max-width: 390px; margin-inline: auto; } }
+
+.token.threat { box-shadow: 0 0 0 3px #a84b0b, 0 0 0 5px #ffce7b; }
