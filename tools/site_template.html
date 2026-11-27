@@ -342,6 +342,8 @@ body {
 
 .board-hit { cursor: pointer; }
 .board-hit:hover { fill: rgba(56, 189, 248, 0.25); }
+.board-hit:focus:not(:focus-visible),
+.jg-hit:focus:not(:focus-visible) { outline: none; }
 
 /* ---------- 장기판 ---------- */
 .jg-piece { font-weight: 700; }
@@ -1295,6 +1297,14 @@ function jgInPalace(side, r, c) {
 }
 function jgSign(x) { return x > 0 ? 1 : (x < 0 ? -1 : 0); }
 
+function jgParticle(name) {
+  // 목적격 조사: 받침이 있으면 '을', 없으면 '를'
+  const ch = String(name || '').charCodeAt(String(name || '').length - 1);
+  const idx = ch - 0xAC00;
+  if (idx < 0 || idx > 11171) return '을';
+  return idx % 28 === 0 ? '를' : '을';
+}
+
 function jgDiagRays(r, c) {
   const out = [];
   JG_DIAG.forEach(function (seg) {
@@ -2013,7 +2023,8 @@ function playJanggiMove(p, from, to) {
   janggiTargets = [];
   playTone(isCorrect ? 'ok' : 'ng');
   if (res.captured) {
-    showToast((res.captured.side === 'cho' ? '초 ' : '한 ') + (JG_NAME[res.captured.kind] || '기물') + '을 잡았습니다!');
+    const name = JG_NAME[res.captured.kind] || '기물';
+    showToast((res.captured.side === 'cho' ? '초 ' : '한 ') + name + jgParticle(name) + ' 잡았습니다!');
   }
   if (!isCorrect) wrongTries += 1;
   renderBoardOnly();
