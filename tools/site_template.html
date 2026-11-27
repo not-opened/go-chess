@@ -116,26 +116,38 @@ body {
 .yt-banner {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  justify-content: flex-start;
+  gap: 8px;
   width: 100%;
-  min-height: 48px;
-  height: auto;
-  padding: 12px 12px;
+  min-height: 46px;
+  padding: 6px 12px;
   margin-bottom: 14px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(239, 68, 68, 0.06));
-  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.13), rgba(30, 41, 59, 0.85));
+  border: 1px solid rgba(239, 68, 68, 0.4);
   color: var(--text-main);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.35;
   text-decoration: none;
-  text-align: center;
+  text-align: left;
 }
-.yt-banner:active { background: linear-gradient(135deg, rgba(239, 68, 68, 0.32), rgba(239, 68, 68, 0.10)); }
-.yt-banner .yt-ico { color: #f87171; font-size: 0.82rem; flex: 0 0 auto; }
-.yt-banner .yt-text { min-width: 0; flex: 1 1 auto; }
+.yt-banner:active { border-color: rgba(239, 68, 68, 0.75); background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(30, 41, 59, 0.95)); }
+.yt-banner .yt-play {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.58rem;
+  line-height: 1;
+  padding-left: 1px;
+}
+.yt-banner .yt-text { min-width: 0; white-space: nowrap; }
 .yt-banner .yt-arrow { color: #fca5a5; flex: 0 0 auto; }
 
 .title-row { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
@@ -552,8 +564,8 @@ body {
       <span class="brand-name">notopened</span>
     </a>
     <a class="yt-banner" href="https://www.youtube.com/@notopened" target="_blank" rel="noopener noreferrer" aria-label="notopened 공식 유튜브 새 창으로 열기">
-      <span class="yt-ico" aria-hidden="true">▶</span>
-      <span class="yt-text">notopened 공식 유튜브 — 매일 한 수·상식 쇼츠 보러가기</span>
+      <span class="yt-play" aria-hidden="true">▶</span>
+      <span class="yt-text">notopened 공식 유튜브 — 매일 30초 쇼츠 보러가기</span>
       <span class="yt-arrow" aria-hidden="true">→</span>
     </a>
     <header class="portal-header" role="banner">
