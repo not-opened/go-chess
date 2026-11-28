@@ -1463,7 +1463,7 @@ function renderGoBoard(p) {
      9×9 바둑판의 실제 화점 5곳과 어긋난다. 그래서 나뭇결만 남긴 텍스처
      (assets/go_board_wood.webp)를 배경으로 깔고, 교차선·화점은 아래 SVG 가
      정확한 좌표로 그린다. */
-  const wood = woodLayer(svg, 'goWoodTile', vb, vb, 152, null);
+  const wood = woodLayer(svg, 'goWoodTile', vb, vb, 228, 0.9);
   if (wood) svg.appendChild(wood);
 
   for (let i = 0; i < size; i++) {
