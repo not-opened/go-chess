@@ -51,6 +51,9 @@ def run(url, shot_prefix, out_json, vw, vh):
         page.on("request", on_request)
         page.goto(url, wait_until="load")
         page.wait_for_timeout(500)
+        # 난이도·문제 번호 필터는 <details id="hubOptions"> 안에 접혀 있다. 검사 전에 전부 펼친다.
+        page.evaluate("() => document.querySelectorAll('details').forEach(d => { d.open = true; })")
+        page.wait_for_timeout(150)
 
         html = page.content()
         for word in FORBIDDEN:
@@ -126,7 +129,8 @@ def run(url, shot_prefix, out_json, vw, vh):
         check("장기 타입 표기", "장기" in page.locator("#puzzleTypePill").inner_text(), page.locator("#puzzleTypePill").inner_text())
         check("장기 정답 문구", "행" in page.evaluate("() => window.miniPuzzles.find(p => p.type==='janggi').answerText"))
         piece_count = page.evaluate("() => window.miniPuzzles.find(p => p.type==='janggi').pieces.length")
-        check("장기 기물 수 일치", page.locator("#boardWrap text.jg-piece").count() == piece_count, (page.locator("#boardWrap text.jg-piece").count(), piece_count))
+        # 기물은 궁(그림 타일)과 나머지(SVG 타일) 모두 data-jg-piece 로 표시한다.
+        check("장기 기물 수 일치", page.locator("#boardWrap [data-jg-piece]").count() == piece_count, (page.locator("#boardWrap [data-jg-piece]").count(), piece_count))
 
         # ---------- 장기: 기물 선택 → 착수(정답) ----------
         page.locator(".puzzle-tab").nth(0).click()

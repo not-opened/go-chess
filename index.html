@@ -794,8 +794,8 @@ body {
 
       <div class="board-wrap" id="boardWrap"></div>
       <div class="jg-legend" id="janggiLegend" hidden>
-        <span><i style="color:#dc2626">漢</i> 한(漢) · 나</span>
-        <span><i style="color:#0d9488">楚</i> 초(楚) · 상대</span>
+        <span><i style="color:#a8231f">漢</i> 한(漢) · 나</span>
+        <span><i style="color:#2a5b95">楚</i> 초(楚) · 상대</span>
       </div>
 
       <button type="button" class="hint-btn" id="hintBtn" aria-expanded="false" aria-controls="hintBox">💡 힌트 보기</button>
@@ -1235,6 +1235,124 @@ function stonesToMap(p) {
   return m;
 }
 
+/* ---------- 2.5D 보드·기물 에셋 (2026-11-28 하이디 납품) ---------- */
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const XLINK_NS = 'http://www.w3.org/1999/xlink';
+const BOARD_ASSET_FILES = {
+  goWood: 'assets/go_board_wood.webp',
+  stoneBlack: 'assets/go_stone_black.webp',
+  stoneWhite: 'assets/go_stone_white.webp',
+  jgHanKing: 'assets/janggi_han_king.webp',
+  jgChoKing: 'assets/janggi_cho_king.webp',
+  chessKW: 'assets/chess_king.webp',
+  chessQW: 'assets/chess_queen.webp',
+  chessNW: 'assets/chess_knight_white.webp',
+  chessKB: 'assets/chess_king_dark.webp',
+  chessQB: 'assets/chess_queen_dark.webp',
+  chessNB: 'assets/chess_knight.webp'
+};
+/* 납품 원본은 96×96. 그림이 실제로 차지하는 중심·폭(w)과 화면에 그릴 폭(size)을 적는다.
+   여백이 있어 그대로 넣으면 기물이 작아 보이므로 중심 기준으로 보정해 그린다. */
+const BOARD_ART = {
+  stoneBlack: { w: 76, cx: 47.5, cy: 46.5, size: 32 },
+  stoneWhite: { w: 76, cx: 47.5, cy: 46.5, size: 32 },
+  jgHanKing: { w: 71, cx: 48, cy: 48.5, size: 28 },
+  jgChoKing: { w: 71, cx: 48, cy: 48.5, size: 28 },
+  chessKW: { w: 74, cx: 47.5, cy: 49, size: 32 },
+  chessKB: { w: 74, cx: 47.5, cy: 49, size: 32 },
+  chessQW: { w: 74, cx: 47.5, cy: 49, size: 32 },
+  chessQB: { w: 74, cx: 47.5, cy: 49, size: 32 },
+  chessNW: { w: 74, cx: 47.5, cy: 49, size: 32 },
+  chessNB: { w: 74, cx: 47.5, cy: 49, size: 32 }
+};
+const BOARD_IMG = {};
+let boardAssetState = 'idle';
+
+function boardImageEl(key, cx, cy) {
+  const url = BOARD_IMG[key];
+  const m = BOARD_ART[key];
+  if (!url || !m) return null;
+  const s = m.size / m.w;
+  const img = document.createElementNS(SVG_NS, 'image');
+  img.setAttribute('href', url);
+  img.setAttributeNS(XLINK_NS, 'xlink:href', url);
+  img.setAttribute('x', (cx - m.cx * s).toFixed(2));
+  img.setAttribute('y', (cy - m.cy * s).toFixed(2));
+  img.setAttribute('width', (96 * s).toFixed(2));
+  img.setAttribute('height', (96 * s).toFixed(2));
+  img.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  img.setAttribute('pointer-events', 'none');
+  return img;
+}
+
+function boardBlobToUrl(blob) {
+  return new Promise(function (resolve) {
+    try {
+      const mime = (blob.type && blob.type.indexOf('image/') === 0) ? blob.type : 'image/webp';
+      const fr = new FileReader();
+      fr.onload = function () {
+        if (!fr.result) { resolve(''); return; }
+        const bytes = new Uint8Array(fr.result);
+        let bin = '';
+        for (let i = 0; i < bytes.length; i += 0x8000) {
+          bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+        }
+        resolve('data:' + mime + ';base64,' + btoa(bin));
+      };
+      fr.onerror = function () { resolve(''); };
+      fr.readAsArrayBuffer(blob);
+    } catch (e) { resolve(''); }
+  });
+}
+
+/* 그림은 한 번만 받아 data URL 로 들고 있는다.
+   공유 이미지는 보드 SVG 를 직렬화해 <img> 로 다시 그리는데, 그때 외부 파일 참조는
+   따라오지 않으므로 data URL 이어야 공유 카드에서도 기물이 그대로 나온다. */
+function loadBoardAssets() {
+  if (boardAssetState !== 'idle') return;
+  boardAssetState = 'loading';
+  if (typeof fetch !== 'function' || typeof FileReader !== 'function') { boardAssetState = 'failed'; return; }
+  const keys = Object.keys(BOARD_ASSET_FILES);
+  Promise.all(keys.map(function (key) {
+    return fetch(BOARD_ASSET_FILES[key], { cache: 'force-cache' })
+      .then(function (res) { return res && res.ok ? res.blob() : null; })
+      .then(function (blob) { return blob ? boardBlobToUrl(blob) : ''; })
+      .then(function (url) { if (url) BOARD_IMG[key] = url; })
+      .catch(function () { return null; });
+  })).then(function () {
+    boardAssetState = Object.keys(BOARD_IMG).length ? 'ready' : 'failed';
+    if (boardAssetState === 'ready' && typeof renderBoardOnly === 'function') renderBoardOnly();
+  });
+}
+
+function woodLayer(svg, id, w, h, period, opacity) {
+  const url = BOARD_IMG.goWood;
+  if (!url) return null;
+  const defs = document.createElementNS(SVG_NS, 'defs');
+  const pat = document.createElementNS(SVG_NS, 'pattern');
+  pat.setAttribute('id', id);
+  pat.setAttribute('patternUnits', 'userSpaceOnUse');
+  pat.setAttribute('width', String(period));
+  pat.setAttribute('height', String(period));
+  const img = document.createElementNS(SVG_NS, 'image');
+  img.setAttribute('href', url);
+  img.setAttributeNS(XLINK_NS, 'xlink:href', url);
+  img.setAttribute('width', String(period));
+  img.setAttribute('height', String(period));
+  img.setAttribute('preserveAspectRatio', 'none');
+  pat.appendChild(img);
+  defs.appendChild(pat);
+  svg.appendChild(defs);
+  const rect = document.createElementNS(SVG_NS, 'rect');
+  rect.setAttribute('width', String(w));
+  rect.setAttribute('height', String(h));
+  rect.setAttribute('rx', '10');
+  rect.setAttribute('fill', 'url(#' + id + ')');
+  if (opacity !== null && opacity !== undefined) rect.setAttribute('opacity', String(opacity));
+  rect.setAttribute('pointer-events', 'none');
+  return rect;
+}
+
 /* ---------- 보드 렌더 (바둑) ---------- */
 /* ---------- 수순 하이라이트(출발→도착 화살표·정답 표시) ---------- */
 function moveArrow(svgNS, svg, x1, y1, x2, y2, color, opts) {
@@ -1341,6 +1459,12 @@ function renderGoBoard(p) {
   bg.setAttribute('width', vb); bg.setAttribute('height', vb);
   bg.setAttribute('rx', '10'); bg.setAttribute('fill', '#dcb35c');
   svg.appendChild(bg);
+  /* 납품한 기와(kaya) 타일은 교차선과 화점이 찍힌 '한 칸' 그림이라 그대로 반복하면
+     9×9 바둑판의 실제 화점 5곳과 어긋난다. 그래서 나뭇결만 남긴 텍스처
+     (assets/go_board_wood.webp)를 배경으로 깔고, 교차선·화점은 아래 SVG 가
+     정확한 좌표로 그린다. */
+  const wood = woodLayer(svg, 'goWoodTile', vb, vb, 152, null);
+  if (wood) svg.appendChild(wood);
 
   for (let i = 0; i < size; i++) {
     const pos = pad + i * cell;
@@ -1417,6 +1541,9 @@ function renderGoBoard(p) {
     for (let c = 0; c < size; c++) {
       const color = map.get(goKey(r, c));
       if (!color) continue;
+      const stoneArt = boardImageEl(color === 'B' ? 'stoneBlack' : 'stoneWhite',
+        pad + c * cell, pad + r * cell);
+      if (stoneArt) { svg.appendChild(stoneArt); continue; }
       const st = document.createElementNS(svgNS, 'circle');
       st.setAttribute('cx', pad + c * cell);
       st.setAttribute('cy', pad + r * cell);
@@ -1554,52 +1681,87 @@ function chessPieceGroup(svgNS, cx, cy, symbol, side, row, col) {
   g.setAttribute('data-piece', kind);
   g.setAttribute('data-side', side);
   g.setAttribute('data-square', String.fromCharCode(97 + col) + (8 - row));
-  const fill = side === 'W' ? '#f8fafc' : '#111827';
-  const ink = side === 'W' ? '#0f172a' : '#f8fafc';
+
+  /* 납품한 킹·퀸·나이트 메달은 그림을 그대로 쓴다. 룩·비숍·폰은 미납품이라
+     같은 메달 규격(원판·금테·실루엣)으로 SVG 로 그려 옆에 놓아도 이질감이 없게 한다. */
+  const artKey = kind === 'K' ? (side === 'W' ? 'chessKW' : 'chessKB')
+    : (kind === 'Q' ? (side === 'W' ? 'chessQW' : 'chessQB')
+      : (kind === 'N' ? (side === 'W' ? 'chessNW' : 'chessNB') : ''));
+  const art = artKey ? boardImageEl(artKey, 0, 0) : null;
+  if (art) {
+    g.appendChild(art);
+    return g;
+  }
+
+  const light = side === 'W';
+  const discFill = light ? '#f9f0e1' : '#2e3543';
+  const ink = light ? '#382d1e' : '#f3deb3';
+  const R = 16;
   function el(tag, attrs) {
     const n = document.createElementNS(svgNS, tag);
     Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
     g.appendChild(n);
   }
-  const pen = { fill: fill, stroke: ink, 'stroke-width': '1.45', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
+  el('circle', { cx: '0', cy: '1.5', r: String(R - 0.5), fill: '#0b1220', opacity: '0.38' });
+  el('circle', { cx: '0', cy: '0', r: String(R), fill: light ? '#bda274' : '#12161d' });
+  el('circle', { cx: '0', cy: '0', r: String(R - 1.2), fill: '#c3a97c' });
+  el('circle', { cx: '0', cy: '0', r: String(R - 2.3), fill: discFill });
+  el('circle', {
+    cx: '0', cy: '0', r: String(R - 4.5), fill: 'none',
+    stroke: light ? 'rgba(120, 96, 62, 0.28)' : 'rgba(150, 175, 200, 0.35)',
+    'stroke-width': '0.8'
+  });
+
+  const glyph = document.createElementNS(svgNS, 'g');
+  glyph.setAttribute('transform', 'scale(0.82)');
+  g.appendChild(glyph);
+  function gl(tag, attrs) {
+    const n = document.createElementNS(svgNS, tag);
+    Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    glyph.appendChild(n);
+  }
+  const pen = {
+    fill: ink, stroke: ink, 'stroke-width': '1.1',
+    'stroke-linejoin': 'round', 'stroke-linecap': 'round'
+  };
   function pedestal(topY) {
-    el('path', Object.assign({ d: 'M-8 ' + topY + ' L-11.5 12 H11.5 L8 ' + topY + ' Z' }, pen));
-    el('rect', Object.assign({ x: '-13.5', y: '12', width: '27', height: '4.4', rx: '1.4' }, pen));
+    gl('path', Object.assign({ d: 'M-8 ' + topY + ' L-11.5 12 H11.5 L8 ' + topY + ' Z' }, pen));
+    gl('rect', Object.assign({ x: '-13.5', y: '12', width: '27', height: '4.4', rx: '1.4' }, pen));
   }
   if (kind === 'P') {
-    el('circle', Object.assign({ cx: '0', cy: '-8', r: '5.1' }, pen));
-    el('path', Object.assign({ d: 'M-4.4 -4 L-8.2 10 H8.2 L4.4 -4 Z' }, pen));
-    el('rect', Object.assign({ x: '-10.5', y: '10', width: '21', height: '4.4', rx: '1.3' }, pen));
+    gl('circle', Object.assign({ cx: '0', cy: '-8', r: '5.1' }, pen));
+    gl('path', Object.assign({ d: 'M-4.4 -4 L-8.2 10 H8.2 L4.4 -4 Z' }, pen));
+    gl('rect', Object.assign({ x: '-10.5', y: '10', width: '21', height: '4.4', rx: '1.3' }, pen));
   } else if (kind === 'R') {
-    el('path', Object.assign({
+    gl('path', Object.assign({
       d: 'M-11.5 -15 H-6.6 V-10.2 H-2.2 V-15 H2.2 V-10.2 H6.6 V-15 H11.5 V9.2 H-11.5 Z'
     }, pen));
-    el('rect', Object.assign({ x: '-13.5', y: '9.2', width: '27', height: '4.6', rx: '1.4' }, pen));
+    gl('rect', Object.assign({ x: '-13.5', y: '9.2', width: '27', height: '4.6', rx: '1.4' }, pen));
   } else if (kind === 'N') {
-    el('path', Object.assign({
+    gl('path', Object.assign({
       d: 'M-1 13 C-2 13 -11 10 -11 2.5 C-11 -1.5 -7.5 -3.5 -3.5 -5.5 L-8.5 -9 L-3 -15.5 L4.5 -12.5 L2 -7 L9.5 -9.5 L14.5 -2 L9.2 1.2 L11.2 6.2 L4.8 7.2 L2.6 13 Z'
     }, pen));
-    el('circle', { cx: '1.4', cy: '-8.2', r: '1.2', fill: ink });
-    el('rect', Object.assign({ x: '-11.5', y: '12', width: '23', height: '4.2', rx: '1.3' }, pen));
+    gl('circle', { cx: '1.4', cy: '-8.2', r: '1.2', fill: discFill });
+    gl('rect', Object.assign({ x: '-11.5', y: '12', width: '23', height: '4.2', rx: '1.3' }, pen));
   } else if (kind === 'B') {
-    el('circle', Object.assign({ cx: '0', cy: '-14.6', r: '2.35' }, pen));
-    el('path', Object.assign({
+    gl('circle', Object.assign({ cx: '0', cy: '-14.6', r: '2.35' }, pen));
+    gl('path', Object.assign({
       d: 'M0 -11.5 C6.4 -9.8 8.2 -4.6 7.3 1.2 C6.4 6.4 3.8 9.2 0 10.2 C-3.8 9.2 -6.4 6.4 -7.3 1.2 C-8.2 -4.6 -6.4 -9.8 0 -11.5 Z'
     }, pen));
-    el('path', { d: 'M0 -8.2 V4.2', fill: 'none', stroke: ink, 'stroke-width': '1.6' });
-    el('rect', Object.assign({ x: '-12.2', y: '10.2', width: '24.4', height: '4.4', rx: '1.3' }, pen));
+    gl('path', { d: 'M0 -8.2 V4.2', fill: 'none', stroke: discFill, 'stroke-width': '1.5' });
+    gl('rect', Object.assign({ x: '-12.2', y: '10.2', width: '24.4', height: '4.4', rx: '1.3' }, pen));
   } else if (kind === 'Q') {
-    el('circle', Object.assign({ cx: '-8.2', cy: '-13.4', r: '2.55' }, pen));
-    el('circle', Object.assign({ cx: '0', cy: '-16', r: '2.55' }, pen));
-    el('circle', Object.assign({ cx: '8.2', cy: '-13.4', r: '2.55' }, pen));
-    el('path', Object.assign({
+    gl('circle', Object.assign({ cx: '-8.2', cy: '-13.4', r: '2.55' }, pen));
+    gl('circle', Object.assign({ cx: '0', cy: '-16', r: '2.55' }, pen));
+    gl('circle', Object.assign({ cx: '8.2', cy: '-13.4', r: '2.55' }, pen));
+    gl('path', Object.assign({
       d: 'M-10.4 -11 L-8 -4.2 H8 L10.4 -11 L5.6 -6.6 L0 -3.4 L-5.6 -6.6 Z'
     }, pen));
     pedestal(-4.2);
   } else {
-    el('rect', Object.assign({ x: '-2.4', y: '-17.2', width: '4.8', height: '10.2', rx: '0.7' }, pen));
-    el('rect', Object.assign({ x: '-7.2', y: '-14.5', width: '14.4', height: '4.6', rx: '0.7' }, pen));
-    el('path', Object.assign({ d: 'M-9.2 -7.4 H9.2 L7.4 -2.2 H-7.4 Z' }, pen));
+    gl('rect', Object.assign({ x: '-2.4', y: '-17.2', width: '4.8', height: '10.2', rx: '0.7' }, pen));
+    gl('rect', Object.assign({ x: '-7.2', y: '-14.5', width: '14.4', height: '4.6', rx: '0.7' }, pen));
+    gl('path', Object.assign({ d: 'M-9.2 -7.4 H9.2 L7.4 -2.2 H-7.4 Z' }, pen));
     pedestal(-2.2);
   }
   return g;
@@ -1830,6 +1992,55 @@ function janggiLiveMap(p) {
 }
 
 /* ---------- 보드 렌더 (장기) ---------- */
+/* 미납품 장기 기물 — 납품한 궁 타일(팔각 나무판·금테·측면 두께)과 같은 규격으로 그린다. */
+function janggiTileGroup(svgNS, cx, cy, symbol, side, mover) {
+  const g = document.createElementNS(svgNS, 'g');
+  g.setAttribute('transform', 'translate(' + cx + ' ' + cy + ')');
+  g.setAttribute('pointer-events', 'none');
+  const ink = side === 'han' ? '#a8231f' : '#2a5b95';
+  const W = 13.9, H = 14.9, C = 7.4;
+  function oct(dy, grow) {
+    const w = W + grow, h = H + grow, c = C + grow;
+    function n(v) { return v.toFixed(2); }
+    return 'M' + n(-(w - c)) + ' ' + n(-h + dy) +
+      'H' + n(w - c) +
+      'L' + n(w) + ' ' + n(-h + dy + c) +
+      'V' + n(h + dy - c) +
+      'L' + n(w - c) + ' ' + n(h + dy) +
+      'H' + n(-(w - c)) +
+      'L' + n(-w) + ' ' + n(h + dy - c) +
+      'V' + n(-h + dy + c) + 'Z';
+  }
+  function el(tag, attrs) {
+    const node = document.createElementNS(svgNS, tag);
+    Object.keys(attrs).forEach(function (k) { node.setAttribute(k, attrs[k]); });
+    g.appendChild(node);
+  }
+  el('path', { d: oct(3.4, 1.2), fill: '#3b2a10', opacity: '0.16' });
+  el('path', {
+    d: oct(2.1, -0.3), fill: '#b0812f', stroke: '#8a6323', 'stroke-width': '0.6',
+    'stroke-linejoin': 'round'
+  });
+  el('path', {
+    d: oct(0, 0), fill: 'url(#jgTileFace)',
+    stroke: mover ? '#b98c3e' : '#c9a568',
+    'stroke-width': mover ? '1.7' : '1',
+    'stroke-linejoin': 'round'
+  });
+  const t = document.createElementNS(svgNS, 'text');
+  t.setAttribute('x', '0');
+  t.setAttribute('y', '5.4');
+  t.setAttribute('text-anchor', 'middle');
+  t.setAttribute('font-size', '15.4');
+  t.setAttribute('font-weight', '800');
+  t.setAttribute('fill', ink);
+  t.setAttribute('class', 'jg-piece');
+  t.setAttribute('data-jg-piece', '1');
+  t.textContent = symbol;
+  g.appendChild(t);
+  return g;
+}
+
 function renderJanggiBoard(p) {
   const rows = p.rows || JG_ROWS, cols = p.cols || JG_COLS;
   const pad = 18, cell = 34;
@@ -1846,6 +2057,22 @@ function renderJanggiBoard(p) {
   bg.setAttribute('width', vbW); bg.setAttribute('height', vbH);
   bg.setAttribute('rx', '10'); bg.setAttribute('fill', '#e6c894');
   svg.appendChild(bg);
+  const wood = woodLayer(svg, 'jgWoodTile', vbW, vbH, 170, 0.5);
+  if (wood) svg.appendChild(wood);
+  /* 납품한 장기 타일과 같은 나무결·금테를 SVG 기물에도 입힌다. */
+  const defs = document.createElementNS(svgNS, 'defs');
+  const grad = document.createElementNS(svgNS, 'linearGradient');
+  grad.setAttribute('id', 'jgTileFace');
+  grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+  grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+  [['0%', '#fbe9bf'], ['55%', '#f2d9a4'], ['100%', '#e5c288']].forEach(function (stop) {
+    const s = document.createElementNS(svgNS, 'stop');
+    s.setAttribute('offset', stop[0]);
+    s.setAttribute('stop-color', stop[1]);
+    grad.appendChild(s);
+  });
+  defs.appendChild(grad);
+  svg.appendChild(defs);
 
   function lineEl(x1, y1, x2, y2, width) {
     const l = document.createElementNS(svgNS, 'line');
@@ -1932,30 +2159,19 @@ function renderJanggiBoard(p) {
     svg.appendChild(m);
   });
 
-  // 기물
+  // 기물 — 궁은 납품 타일(漢·楚) 그림, 나머지는 같은 규격의 SVG 타일
   map.forEach(function (x, k) {
     const parts = k.split(',');
     const r = parseInt(parts[0], 10), c = parseInt(parts[1], 10);
     const cx = pad + c * cell, cy = pad + r * cell;
-    const color = x.side === 'han' ? '#b91c1c' : '#0f766e';
-    const disk = document.createElementNS(svgNS, 'circle');
-    disk.setAttribute('cx', cx); disk.setAttribute('cy', cy);
-    disk.setAttribute('r', '14.4');
-    disk.setAttribute('fill', x.side === 'han' ? '#fdf3df' : '#eef7f3');
-    disk.setAttribute('stroke', color);
-    disk.setAttribute('stroke-width', x.mover ? '2' : '1.3');
-    disk.setAttribute('pointer-events', 'none');
-    svg.appendChild(disk);
-    const tx = document.createElementNS(svgNS, 'text');
-    tx.setAttribute('x', cx); tx.setAttribute('y', cy + 5.4);
-    tx.setAttribute('text-anchor', 'middle');
-    tx.setAttribute('font-size', '15');
-    tx.setAttribute('font-weight', '700');
-    tx.setAttribute('fill', color);
-    tx.setAttribute('pointer-events', 'none');
-    tx.setAttribute('class', 'jg-piece');
-    tx.textContent = x.symbol;
-    svg.appendChild(tx);
+    const kingArt = x.kind === 'K'
+      ? boardImageEl(x.side === 'han' ? 'jgHanKing' : 'jgChoKing', cx, cy) : null;
+    if (kingArt) {
+      kingArt.setAttribute('data-jg-piece', '1');
+      svg.appendChild(kingArt);
+      return;
+    }
+    svg.appendChild(janggiTileGroup(svgNS, cx, cy, x.symbol, x.side, !!x.mover));
   });
 
   // 선택 표시
@@ -2518,6 +2734,7 @@ function endHubReview() {
 }
 
 function init() {
+  loadBoardAssets();
   if (typeof createHubReview === 'function') {
     hubReview = createHubReview({ puzzles:miniPuzzles, startReview:startHubReview, endReview:endHubReview });
     document.getElementById('hubMistakes').hidden = false;
