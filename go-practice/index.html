@@ -12,6 +12,13 @@
 <script defer src="lessons.js"></script>
 <script defer src="../mistake-review.js"></script>
 <script defer src="../tactics-course.js?v=review"></script>
+<style>
+.go-learn { margin: 18px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+.go-learn h2 { margin: 0 0 4px; font-size: 1rem; }
+.go-learn-links { display: flex; flex-wrap: wrap; column-gap: 24px; }
+.go-learn-links a { display: flex; align-items: center; min-height: 44px; padding: 4px 2px; font-size: .94rem; font-weight: 650; text-underline-offset: .18em; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .go-learn-links { display: grid; } }
+</style>
 </head>
 <body data-topic="go">
 <main>
@@ -51,6 +58,13 @@
   <a class="retry" href="../#go-01">기존 바둑 퍼즐</a></div>
 </section>
 <noscript><p>연습판에서 두려면 브라우저에서 자바스크립트를 켜 주세요.</p></noscript>
+<section class="go-learn" aria-labelledby="go-learn-title">
+  <h2 id="go-learn-title">바둑 더 배우기</h2>
+  <div class="go-learn-links">
+    <a href="https://www.youtube.com/playlist?list=PLY7qET3F1Q2o" target="_blank" rel="noopener noreferrer" aria-label="영상으로 배우기 · 바둑 강의 재생목록 (새 탭)">영상으로 배우기 · 바둑 강의 재생목록</a>
+    <a href="https://penta309.tistory.com/m/category/%EB%B0%94%EB%91%91%20%EA%B5%90%EC%8B%A4" target="_blank" rel="noopener noreferrer" aria-label="글로 복습하기 · 티스토리 바둑 교실 (새 탭)">글로 복습하기 · 티스토리 바둑 교실</a>
+  </div>
+</section>
 <footer>규칙과 전술을 연습하기 위한 예제입니다. <a href="../">바둑·체스·장기 한 수 미니</a></footer>
 </main>
 </body></html>
