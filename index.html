@@ -695,6 +695,17 @@ body {
 .title-row .icon-toggle-btn{grid-column:3;position:static;transform:none;width:44px;height:44px}
 @media(max-width:440px){.title-row{grid-template-columns:minmax(0,1fr) 44px}.title-row h1{grid-column:1}.title-row .icon-toggle-btn{grid-column:2}}
 </style>
+<style id="hub-compact-flow">
+#typeFilters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:8px}
+#typeFilters button{padding-inline:3px;min-width:0;text-align:center}
+.hub-disclosure{border:1px solid var(--border);border-radius:12px;background:var(--card-bg);padding:0 10px;margin:0 0 10px}
+.hub-disclosure summary{cursor:pointer;box-sizing:border-box;min-height:44px;padding:10px 0;color:var(--accent);font-weight:750;line-height:1.5}
+.hub-disclosure[open] summary{margin-bottom:4px}
+#hubOptions{margin-top:12px}
+#hubOptions .streak-row{margin-top:8px}
+.hub-back-to-board{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:700}
+#puzzleCard{scroll-margin-top:8px}
+</style>
 </head>
 <body>
   <main class="container">
@@ -724,21 +735,17 @@ body {
           <span class="daily-sub" id="dailySub">오늘의 문제를 불러오는 중…</span>
         </span>
       </button>
-      <div class="streak-row" id="streakRow" aria-live="polite">
-        <span class="streak-badge" id="streakBadge">🌱 입문자</span>
-        <span class="streak-stat" id="streakStat">연속 0일 · 오늘의 한 수 0개 해결</span>
-        <button type="button" class="streak-share" id="streakShareBtn" hidden>📤 오늘 기록 공유</button>
-      </div>
     </header>
 
     <nav class="filter-bar" id="typeFilters" aria-label="종목 필터">
-      <span class="filter-label">종목</span>
       <button type="button" class="filter-chip active" data-type="all">전체 45</button>
       <button type="button" class="filter-chip" data-type="go">⚫ 바둑 15</button>
       <button type="button" class="filter-chip" data-type="chess">♟️ 체스 15</button>
       <button type="button" class="filter-chip" data-type="janggi">🏮 장기 15</button>
     </nav>
 
+    <details class="hub-disclosure" id="hubPractice">
+      <summary>연습 코스 보기</summary>
     <div class="practice-links">
     <a class="web-card" href="./go-practice/">
       <span>
@@ -773,25 +780,7 @@ body {
     </a>
 
     </div>
-
-    <nav class="filter-bar" id="diffFilters" aria-label="난이도 필터">
-      <span class="filter-label">난이도</span>
-      <button type="button" class="filter-chip active" data-diff="all">전체</button>
-      <button type="button" class="filter-chip" data-diff="입문">입문</button>
-      <button type="button" class="filter-chip" data-diff="중급">중급</button>
-      <button type="button" class="filter-chip" data-diff="고급">고급</button>
-    </nav>
-
-    <p class="progress-line">푼 문제 <b id="solvedCount">0</b> / <span id="totalCount">45</span></p>
-    <p class="progress-line progress-breakdown" id="solvedBreakdown"></p>
-
-    <section class="hub-mistakes" aria-label="오답 다시 풀기" id="hubMistakes" hidden>
-      <button type="button" class="btn-secondary" id="hubWrongStart">오답 다시 풀기</button>
-      <button type="button" class="btn-secondary" id="hubWrongExit" hidden>일반 문제로 돌아가기</button>
-      <p id="hubWrongStatus" role="status" tabindex="-1"></p>
-    </section>
-
-    <div class="puzzle-tabs" id="puzzleTabs" role="tablist" aria-label="문제 선택"></div>
+    </details>
 
     <section class="card" id="puzzleCard" aria-live="polite">
       <div class="puzzle-meta">
@@ -800,7 +789,7 @@ body {
         <span class="counter-text" id="puzzleCounter">1 / 45</span>
       </div>
 
-      <h2 class="puzzle-title" id="puzzleTitle">문제 로딩 중…</h2>
+      <h2 class="puzzle-title" id="puzzleTitle" tabindex="-1">문제 로딩 중…</h2>
       <p class="puzzle-prompt" id="puzzlePrompt">보드의 정답 위치를 탭해 한 수를 두세요.</p>
 
       <div class="board-wrap" id="boardWrap"></div>
@@ -838,6 +827,34 @@ body {
         <button type="button" class="btn-share btn-share-link" id="shareLinkBtn">링크 공유</button>
       </div>
     </section>
+
+    <details class="hub-disclosure" id="hubOptions">
+      <summary>문제 번호 · 난이도 · 오답</summary>
+    <nav class="filter-bar" id="diffFilters" aria-label="난이도 필터">
+      <span class="filter-label">난이도</span>
+      <button type="button" class="filter-chip active" data-diff="all">전체</button>
+      <button type="button" class="filter-chip" data-diff="입문">입문</button>
+      <button type="button" class="filter-chip" data-diff="중급">중급</button>
+      <button type="button" class="filter-chip" data-diff="고급">고급</button>
+    </nav>
+
+    <p class="progress-line">푼 문제 <b id="solvedCount">0</b> / <span id="totalCount">45</span></p>
+    <p class="progress-line progress-breakdown" id="solvedBreakdown"></p>
+
+    <section class="hub-mistakes" aria-label="오답 다시 풀기" id="hubMistakes" hidden>
+      <button type="button" class="btn-secondary" id="hubWrongStart">오답 다시 풀기</button>
+      <button type="button" class="btn-secondary" id="hubWrongExit" hidden>일반 문제로 돌아가기</button>
+      <p id="hubWrongStatus" role="status" tabindex="-1"></p>
+    </section>
+
+    <div class="puzzle-tabs" id="puzzleTabs" role="tablist" aria-label="문제 선택"></div>
+      <div class="streak-row" id="streakRow" aria-live="polite">
+        <span class="streak-badge" id="streakBadge">🌱 입문자</span>
+        <span class="streak-stat" id="streakStat">연속 0일 · 오늘의 한 수 0개 해결</span>
+        <button type="button" class="streak-share" id="streakShareBtn" hidden>📤 오늘 기록 공유</button>
+      </div>
+      <a class="hub-back-to-board" href="#puzzleCard">선택한 문제 풀기 ↑</a>
+    </details>
 
     <section class="affiliate-section" id="affiliateSection" aria-label="쿠팡 파트너스 추천 상품" hidden>
       <div class="coupang-wrap" id="coupangWrap">
@@ -1118,7 +1135,9 @@ function selectGlobal(gi) {
 
 function syncChips() {
   document.querySelectorAll('#typeFilters .filter-chip').forEach(function (b) {
-    b.classList.toggle('active', b.getAttribute('data-type') === typeFilter);
+    const selected = b.getAttribute('data-type') === typeFilter;
+    b.classList.toggle('active', selected);
+    b.setAttribute('aria-pressed', String(selected));
   });
   document.querySelectorAll('#diffFilters .filter-chip').forEach(function (b) {
     b.classList.toggle('active', b.getAttribute('data-diff') === diffFilter);
@@ -1998,6 +2017,12 @@ function renderTabs() {
     btn.addEventListener('click', function () { selectIndex(i); });
     wrap.appendChild(btn);
   });
+  centerActivePuzzleTab();
+}
+
+function centerActivePuzzleTab() {
+  const wrap = document.getElementById('puzzleTabs');
+  if (!wrap || !wrap.clientWidth) return;
   const active = wrap.querySelector('.puzzle-tab.active');
   // Center the selected chip inside the strip without scrolling the page.
   if (active && wrap.scrollWidth > wrap.clientWidth) {
@@ -2513,6 +2538,14 @@ function init() {
       applyFilter();
     });
   });
+  document.getElementById('hubOptions').addEventListener('toggle', function () {
+    if (this.open) centerActivePuzzleTab();
+  });
+  document.querySelector('.hub-back-to-board').addEventListener('click', function (event) {
+    event.preventDefault();
+    document.getElementById('puzzleCard').scrollIntoView({block:'start'});
+    document.getElementById('puzzleTitle').focus({preventScroll:true});
+  });
   const retryBtn = document.getElementById('retryBtn');
   if (retryBtn) retryBtn.addEventListener('click', retryPuzzle);
   const nextBtn = document.getElementById('nextBtn');
@@ -2549,6 +2582,7 @@ function init() {
   dailyIdx = info.dayNumber % miniPuzzles.length;
   list = miniPuzzles.slice();
   refreshFilterCounts();
+  syncChips();
   const hashed = indexFromHash();
   let resumedIdx = -1;
   if (hashed < 0) {
@@ -2576,7 +2610,8 @@ function refreshFilterCounts() {
   document.querySelectorAll('#typeFilters .filter-chip').forEach(function (b) {
     const t = b.getAttribute('data-type');
     if (labels[t] === undefined) return;
-    b.textContent = labels[t] + counts[t];
+    b.textContent = { all: '전체', go: '바둑', chess: '체스', janggi: '장기' }[t];
+    b.setAttribute('aria-label', b.textContent + ' ' + counts[t] + '문제');
   });
 }
 
