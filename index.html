@@ -668,6 +668,33 @@ body {
 #hubWrongList li + li { margin-top: .3rem; }
 
 </style>
+<style id="notopened-responsive-ui">/* Use extra space for practice links and the playable board, not wider text lines. */
+.container{max-width:780px}
+.container>.yt-banner{font-size:.875rem;line-height:1.35;margin-bottom:8px}
+.portal-header h1{font-size:clamp(1.22rem,3vw,1.75rem);line-height:1.26;word-break:keep-all}
+.portal-header p,.web-card p,.puzzle-prompt,.feedback-box p{font-size:.9375rem;line-height:1.5}
+.icon-toggle-btn{min-width:44px;min-height:44px}
+.filter-chip{font-size:.875rem;min-height:44px;white-space:normal;line-height:1.35}
+.puzzle-tab{min-height:44px}
+.board-wrap{max-width:440px}
+.practice-links{display:grid;gap:8px;margin:0 0 8px}
+.practice-links .web-card{margin:0;min-width:0}
+.practice-links .web-card>span:first-child{min-width:0}
+.puzzle-tabs{overscroll-behavior-x:contain;scrollbar-width:thin}
+@media(max-width:440px){
+  body{padding-inline:10px}
+  #typeFilters,#diffFilters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .filter-chip{text-align:center;padding-inline:4px}
+  .filter-label{grid-column:1/-1;text-align:left}
+  .puzzle-prompt{overflow-wrap:anywhere}
+}
+@media(min-width:650px){.practice-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.container>.yt-banner .yt-text{white-space:normal;overflow-wrap:anywhere}
+.title-row{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:6px}
+.title-row h1{grid-column:2}
+.title-row .icon-toggle-btn{grid-column:3;position:static;transform:none;width:44px;height:44px}
+@media(max-width:440px){.title-row{grid-template-columns:minmax(0,1fr) 44px}.title-row h1{grid-column:1}.title-row .icon-toggle-btn{grid-column:2}}
+</style>
 </head>
 <body>
   <main class="container">
@@ -712,6 +739,7 @@ body {
       <button type="button" class="filter-chip" data-type="janggi">🏮 장기 15</button>
     </nav>
 
+    <div class="practice-links">
     <a class="web-card" href="./go-practice/">
       <span>
         <h2 style="font-size:0.96rem;margin:0 0 2px">바둑 공격·수비 10수</h2>
@@ -743,6 +771,8 @@ body {
       </span>
       <span class="go" aria-hidden="true">시작 →</span>
     </a>
+
+    </div>
 
     <nav class="filter-bar" id="diffFilters" aria-label="난이도 필터">
       <span class="filter-label">난이도</span>
@@ -1969,8 +1999,11 @@ function renderTabs() {
     wrap.appendChild(btn);
   });
   const active = wrap.querySelector('.puzzle-tab.active');
-  if (active && active.scrollIntoView) {
-    try { active.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) { /* ignore */ }
+  // Center the selected chip inside the strip without scrolling the page.
+  if (active && wrap.scrollWidth > wrap.clientWidth) {
+    const strip = wrap.getBoundingClientRect();
+    const chip = active.getBoundingClientRect();
+    wrap.scrollLeft += chip.left - strip.left - (strip.width - chip.width) / 2;
   }
 }
 
